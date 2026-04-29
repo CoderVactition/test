@@ -72,39 +72,60 @@
     line-height: 1.6;
     margin-bottom: 24px;
   }
-  .drop {
-    border: 1px dashed var(--line);
-    padding: 18px 16px;
-    text-align: center;
+  .stage {
+    border: 1px solid var(--line);
+    padding: 14px;
+    margin-bottom: 22px;
+  }
+  .stageLabel {
+    font-size: 9px;
+    letter-spacing: 0.25em;
+    color: var(--dim);
+    text-transform: uppercase;
     margin-bottom: 10px;
+  }
+  .stageLabel b { color: var(--gold); font-weight: 500; }
+  .sourceRow {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+  }
+  .drop, .recSrcBtn, .recBtn {
+    border: 1px dashed var(--line);
+    padding: 14px 8px;
+    text-align: center;
     cursor: pointer;
     display: block;
-  }
-  .drop p { font-size: 11px; letter-spacing: 0.1em; }
-  .drop .hint { color: var(--dim); font-size: 9px; margin-top: 6px; letter-spacing: 0.2em; }
-  input[type=file] { display: none; }
-  .recBtn {
-    width: 100%;
-    padding: 18px;
-    background: transparent;
-    color: var(--accent);
-    border: 1px solid var(--accent);
     font-family: inherit;
-    font-size: 12px;
-    letter-spacing: 0.25em;
+    font-size: 10px;
+    letter-spacing: 0.15em;
     text-transform: uppercase;
-    cursor: pointer;
-    margin-bottom: 22px;
+    color: var(--ink);
+    background: transparent;
     -webkit-appearance: none;
     appearance: none;
+    width: 100%;
   }
-  .recBtn:disabled { opacity: 0.25; }
-  .recBtn.recording {
+  .recSrcBtn, .recBtn {
+    border: 1px solid var(--line);
+  }
+  .recSrcBtn.recording, .recBtn.recording {
     background: var(--accent);
     color: var(--bg);
+    border-color: var(--accent);
     animation: blink 1s steps(2) infinite;
   }
   @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.65; } }
+  .drop .hint { color: var(--dim); font-size: 9px; margin-top: 4px; letter-spacing: 0.2em; }
+  input[type=file] { display: none; }
+  .recBtn {
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    padding: 16px;
+    font-size: 12px;
+    letter-spacing: 0.25em;
+  }
+  .recBtn:disabled { opacity: 0.25; }
   canvas {
     width: 100%;
     height: 80px;
@@ -194,19 +215,28 @@
     <div class="header">
       <div class="dot"></div>
       <span class="brand">BACKMASK</span>
-      <span class="ver">v.01</span>
+      <span class="ver">v.02</span>
     </div>
 
     <h1>Sing it<br><em>backwards.</em></h1>
-    <p class="sub">Load a clip. Hear it reversed. Mimic the reversed sound. Reverse your mimic. If you nailed it, your mimic-flipped echoes the original.</p>
+    <p class="sub">Make a source clip. Hear it reversed. Mimic that reversed sound. Reverse your mimic. If you nailed it, your mimic-flipped echoes the original.</p>
 
-    <label class="drop" for="file">
-      <p>load source clip</p>
-      <p class="hint">mp3 · m4a · wav · ogg</p>
-    </label>
-    <input type="file" id="file" />
+    <div class="stage">
+      <div class="stageLabel"><b>step 1</b> · load or record source</div>
+      <div class="sourceRow">
+        <label class="drop" for="file">
+          load file
+          <div class="hint">mp3 · m4a · wav</div>
+        </label>
+        <button id="recSrcBtn" class="recSrcBtn">● record source</button>
+      </div>
+      <input type="file" id="file" />
+    </div>
 
-    <button id="recBtn" class="recBtn" disabled>● record your try</button>
+    <div class="stage">
+      <div class="stageLabel"><b>step 2</b> · record your reversed mimic</div>
+      <button id="recBtn" class="recBtn" disabled>● record your try</button>
+    </div>
 
     <canvas id="wave"></canvas>
     <div class="trackLabel" id="trackLabel">— no clip loaded —</div>
@@ -244,6 +274,7 @@
 
 <script>
 const fileInput = document.getElementById('file');
+const recSrcBtn = document.getElementById('recSrcBtn');
 const recBtn = document.getElementById('recBtn');
 const bA = document.getElementById('bA');
 const bB = document.getElementById('bB');
@@ -257,7 +288,7 @@ const ctx = canvas.getContext('2d');
 let audioCtx;
 const buffers = { A: null, B: null, C: null, D: null };
 let currentSource, currentBtn;
-let mediaRecorder, chunks = [], isRecording = false;
+let activeRecorder = null, activeStream = null, activeChunks = [], activeMode = null;
 
 function setStatus(s) { statusEl.textContent = s; }
 
@@ -314,62 +345,87 @@ async function decodeBlob(blob) {
   return await audioCtx.decodeAudioData(arrayBuf);
 }
 
+function loadSource(buffer) {
+  buffers.A = buffer;
+  buffers.B = reverseBuffer(buffer);
+  buffers.C = null;
+  buffers.D = null;
+  bA.disabled = false;
+  bB.disabled = false;
+  bC.disabled = true;
+  bD.disabled = true;
+  recBtn.disabled = false;
+  drawWave(buffer);
+  trackLabel.textContent = 'source · ' + buffer.duration.toFixed(2) + 's';
+}
+
 async function handleFile(file) {
   if (!file) return;
   setStatus('decoding source...');
   try {
-    buffers.A = await decodeBlob(file);
-    buffers.B = reverseBuffer(buffers.A);
-    drawWave(buffers.A);
-    bA.disabled = false;
-    bB.disabled = false;
-    recBtn.disabled = false;
-    trackLabel.textContent = 'source · ' + buffers.A.duration.toFixed(2) + 's';
-    setStatus('ready · play A or B, then record');
+    const buf = await decodeBlob(file);
+    loadSource(buf);
+    setStatus('source loaded · play B then record your try');
   } catch (err) {
     setStatus('decode failed');
     console.error(err);
   }
 }
 
-async function startRecording() {
+async function startRecording(mode) {
   await ensureCtx();
   try {
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    chunks = [];
+    activeStream = stream;
+    activeChunks = [];
+    activeMode = mode;
     let mime = '';
     if (MediaRecorder.isTypeSupported('audio/mp4')) mime = 'audio/mp4';
     else if (MediaRecorder.isTypeSupported('audio/webm')) mime = 'audio/webm';
-    mediaRecorder = mime ? new MediaRecorder(stream, { mimeType: mime }) : new MediaRecorder(stream);
-    mediaRecorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
-    mediaRecorder.onstop = async () => {
+    activeRecorder = mime ? new MediaRecorder(stream, { mimeType: mime }) : new MediaRecorder(stream);
+    activeRecorder.ondataavailable = e => { if (e.data.size > 0) activeChunks.push(e.data); };
+    activeRecorder.onstop = async () => {
       stream.getTracks().forEach(t => t.stop());
-      const blob = new Blob(chunks, { type: mediaRecorder.mimeType });
+      const blob = new Blob(activeChunks, { type: activeRecorder.mimeType });
       try {
-        buffers.C = await decodeBlob(blob);
-        buffers.D = reverseBuffer(buffers.C);
-        bC.disabled = false;
-        bD.disabled = false;
-        drawWave(buffers.C);
-        trackLabel.textContent = 'try · ' + buffers.C.duration.toFixed(2) + 's';
-        setStatus('try ready · compare A·B·C·D');
+        const buf = await decodeBlob(blob);
+        if (mode === 'source') {
+          loadSource(buf);
+          setStatus('source recorded · play B then record your try');
+        } else {
+          buffers.C = buf;
+          buffers.D = reverseBuffer(buf);
+          bC.disabled = false;
+          bD.disabled = false;
+          drawWave(buf);
+          trackLabel.textContent = 'try · ' + buf.duration.toFixed(2) + 's';
+          setStatus('try ready · compare A·B·C·D');
+        }
       } catch (err) {
-        setStatus('try decode failed');
+        setStatus('decode failed');
       }
+      activeRecorder = null;
+      activeMode = null;
     };
-    mediaRecorder.start();
-    isRecording = true;
-    recBtn.classList.add('recording');
-    recBtn.textContent = '■ stop';
-    setStatus('recording your try...');
+    activeRecorder.start();
+    if (mode === 'source') {
+      recSrcBtn.classList.add('recording');
+      recSrcBtn.textContent = '■ stop';
+      setStatus('recording source...');
+    } else {
+      recBtn.classList.add('recording');
+      recBtn.textContent = '■ stop';
+      setStatus('recording your try...');
+    }
   } catch (err) {
     setStatus('mic denied');
   }
 }
 
 function stopRecording() {
-  if (mediaRecorder && mediaRecorder.state !== 'inactive') mediaRecorder.stop();
-  isRecording = false;
+  if (activeRecorder && activeRecorder.state !== 'inactive') activeRecorder.stop();
+  recSrcBtn.classList.remove('recording');
+  recSrcBtn.innerHTML = '● record source';
   recBtn.classList.remove('recording');
   recBtn.textContent = '● record your try';
 }
@@ -397,7 +453,14 @@ async function play(key, btn, label) {
 }
 
 fileInput.addEventListener('change', e => handleFile(e.target.files[0]));
-recBtn.addEventListener('click', () => { if (isRecording) stopRecording(); else startRecording(); });
+recSrcBtn.addEventListener('click', () => {
+  if (activeMode === 'source') stopRecording();
+  else if (!activeMode) startRecording('source');
+});
+recBtn.addEventListener('click', () => {
+  if (activeMode === 'try') stopRecording();
+  else if (!activeMode) startRecording('try');
+});
 bA.addEventListener('click', () => play('A', bA, 'original'));
 bB.addEventListener('click', () => play('B', bB, 'reversed'));
 bC.addEventListener('click', () => play('C', bC, 'your try'));
