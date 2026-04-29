@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
@@ -24,17 +23,12 @@
     align-items: center;
     justify-content: center;
     padding: 24px;
-    background-image:
-      radial-gradient(circle at 20% 10%, rgba(255,91,53,0.08), transparent 40%),
-      radial-gradient(circle at 80% 90%, rgba(255,91,53,0.06), transparent 40%);
   }
   .frame {
     width: 100%;
     max-width: 560px;
     border: 1px solid var(--line);
     padding: 32px 28px;
-    background: rgba(15,16,18,0.6);
-    backdrop-filter: blur(6px);
   }
   .label {
     font-size: 10px;
@@ -66,11 +60,7 @@
     text-align: center;
     margin-bottom: 22px;
     cursor: pointer;
-    transition: all 0.15s ease;
-  }
-  .drop:hover, .drop.over {
-    border-color: var(--accent);
-    color: var(--accent);
+    display: block;
   }
   .drop p { font-size: 12px; }
   .drop .hint { color: var(--dim); font-size: 10px; margin-top: 8px; letter-spacing: 0.1em; }
@@ -98,13 +88,8 @@
     color: var(--ink);
     border: 1px solid var(--line);
     cursor: pointer;
-    transition: all 0.15s ease;
   }
-  button:hover:not(:disabled) {
-    border-color: var(--accent);
-    color: var(--accent);
-  }
-  button:disabled { opacity: 0.3; cursor: not-allowed; }
+  button:disabled { opacity: 0.3; }
   .status {
     margin-top: 20px;
     padding-top: 16px;
@@ -119,35 +104,31 @@
 </head>
 <body>
   <div class="frame">
-    <div class="label">002 // Web Audio Demo</div>
+    <div class="label">Web Audio Demo</div>
     <h1>Reverse <em>audio</em></h1>
-    <p class="sub">Drop in any audio file → decoded → buffer flipped → played.</p>
+    <p class="sub">Pick an audio file. Decoded, flipped, played.</p>
 
-```
-<label class="drop" id="drop">
-  <p>Tap to choose · or drag a file</p>
-  <p class="hint">MP3 · M4A · WAV · OGG · WEBM</p>
-  <input type="file" id="file" accept="audio/*" />
-</label>
+    <label class="drop" for="file">
+      <p>Tap to choose a file</p>
+      <p class="hint">MP3 · M4A · WAV · OGG</p>
+    </label>
+    <input type="file" id="file" accept="audio/*" />
 
-<canvas id="wave"></canvas>
+    <canvas id="wave"></canvas>
 
-<div class="controls">
-  <button id="playBtn" disabled>▶ Original</button>
-  <button id="revBtn" disabled>◀ Reversed</button>
-</div>
+    <div class="controls">
+      <button id="playBtn" disabled>Original</button>
+      <button id="revBtn" disabled>Reversed</button>
+    </div>
 
-<div class="status">
-  <span>STATUS</span>
-  <span id="status">awaiting file</span>
-</div>
-```
-
+    <div class="status">
+      <span>STATUS</span>
+      <span id="status">awaiting file</span>
+    </div>
   </div>
 
 <script>
 const fileInput = document.getElementById('file');
-const drop = document.getElementById('drop');
 const playBtn = document.getElementById('playBtn');
 const revBtn = document.getElementById('revBtn');
 const statusEl = document.getElementById('status');
@@ -218,9 +199,9 @@ async function handleFile(file) {
     drawWave(originalBuffer);
     playBtn.disabled = false;
     revBtn.disabled = false;
-    setStatus(`loaded ${originalBuffer.duration.toFixed(2)}s`);
+    setStatus('loaded ' + originalBuffer.duration.toFixed(2) + 's');
   } catch (err) {
-    setStatus('decode failed');
+    setStatus('decode failed: ' + err.message);
     console.error(err);
   }
 }
@@ -233,27 +214,13 @@ function play(buffer, label) {
   src.connect(audioCtx.destination);
   src.start();
   currentSource = src;
-  setStatus(`playing ${label}`);
-  drawWave(buffer);
+  setStatus('playing ' + label);
   src.onended = () => setStatus('idle');
 }
 
 fileInput.addEventListener('change', e => handleFile(e.target.files[0]));
-
-['dragenter','dragover'].forEach(ev =>
-  drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add('over'); })
-);
-['dragleave','drop'].forEach(ev =>
-  drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.remove('over'); })
-);
-drop.addEventListener('drop', e => {
-  const file = e.dataTransfer.files[0];
-  if (file) handleFile(file);
-});
-
 playBtn.addEventListener('click', () => play(originalBuffer, 'original'));
 revBtn.addEventListener('click', () => play(reversedBuffer, 'reversed'));
 </script>
-
 </body>
 </html>
