@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Reverse Audio · Upload</title>
+<title>Reverse Audio</title>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,500&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -54,16 +54,44 @@
     font-size: 12px;
     margin: 10px 0 28px;
   }
+  .recordBtn {
+    width: 100%;
+    padding: 22px;
+    background: transparent;
+    color: var(--accent);
+    border: 1px solid var(--accent);
+    font-family: inherit;
+    font-size: 13px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    cursor: pointer;
+    margin-bottom: 12px;
+  }
+  .recordBtn.active {
+    background: var(--accent);
+    color: var(--bg);
+    animation: pulse 1.2s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.65; }
+  }
+  .or {
+    text-align: center;
+    color: var(--dim);
+    font-size: 10px;
+    letter-spacing: 0.3em;
+    margin: 12px 0;
+  }
   .drop {
     border: 1px dashed var(--line);
-    padding: 36px 16px;
+    padding: 20px 16px;
     text-align: center;
     margin-bottom: 22px;
     cursor: pointer;
     display: block;
   }
   .drop p { font-size: 12px; }
-  .drop .hint { color: var(--dim); font-size: 10px; margin-top: 8px; letter-spacing: 0.1em; }
   input[type=file] { display: none; }
   canvas {
     width: 100%;
@@ -78,7 +106,7 @@
     grid-template-columns: 1fr 1fr;
     gap: 8px;
   }
-  button {
+  button.play {
     font-family: inherit;
     font-size: 11px;
     letter-spacing: 0.15em;
@@ -89,7 +117,7 @@
     border: 1px solid var(--line);
     cursor: pointer;
   }
-  button:disabled { opacity: 0.3; }
+  button.play:disabled { opacity: 0.3; }
   .status {
     margin-top: 20px;
     padding-top: 16px;
@@ -106,28 +134,32 @@
   <div class="frame">
     <div class="label">Web Audio Demo</div>
     <h1>Reverse <em>audio</em></h1>
-    <p class="sub">Pick an audio file. Decoded, flipped, played.</p>
+    <p class="sub">Record live or pick a file. Decoded, flipped, played.</p>
+
+    <button id="recBtn" class="recordBtn">● Record</button>
+
+    <div class="or">— or —</div>
 
     <label class="drop" for="file">
       <p>Tap to choose a file</p>
-      <p class="hint">MP3 · M4A · WAV · OGG</p>
     </label>
     <input type="file" id="file" />
 
     <canvas id="wave"></canvas>
 
     <div class="controls">
-      <button id="playBtn" disabled>Original</button>
-      <button id="revBtn" disabled>Reversed</button>
+      <button id="playBtn" class="play" disabled>Original</button>
+      <button id="revBtn" class="play" disabled>Reversed</button>
     </div>
 
     <div class="status">
       <span>STATUS</span>
-      <span id="status">awaiting file</span>
+      <span id="status">idle</span>
     </div>
   </div>
 
 <script>
+const recBtn = document.getElementById('recBtn');
 const fileInput = document.getElementById('file');
 const playBtn = document.getElementById('playBtn');
 const revBtn = document.getElementById('revBtn');
@@ -136,6 +168,7 @@ const canvas = document.getElementById('wave');
 const ctx = canvas.getContext('2d');
 
 let audioCtx, originalBuffer, reversedBuffer, currentSource;
+let mediaRecorder, chunks = [], isRecording = false;
 
 function setStatus(s) { statusEl.textContent = s; }
 
@@ -187,13 +220,12 @@ function reverseBuffer(buffer) {
   return reversed;
 }
 
-async function handleFile(file) {
-  if (!file) return;
+async function decodeBlob(blob) {
   setStatus('decoding...');
   try {
     audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
     if (audioCtx.state === 'suspended') await audioCtx.resume();
-    const arrayBuf = await file.arrayBuffer();
+    const arrayBuf = await blob.arrayBuffer();
     originalBuffer = await audioCtx.decodeAudioData(arrayBuf);
     reversedBuffer = reverseBuffer(originalBuffer);
     drawWave(originalBuffer);
@@ -201,9 +233,41 @@ async function handleFile(file) {
     revBtn.disabled = false;
     setStatus('loaded ' + originalBuffer.duration.toFixed(2) + 's');
   } catch (err) {
-    setStatus('decode failed: ' + err.message);
+    setStatus('decode failed');
     console.error(err);
   }
+}
+
+async function startRecording() {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    chunks = [];
+    const mime = MediaRecorder.isTypeSupported('audio/mp4') ? 'audio/mp4' : 'audio/webm';
+    mediaRecorder = new MediaRecorder(stream, { mimeType: mime });
+    mediaRecorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
+    mediaRecorder.onstop = async () => {
+      stream.getTracks().forEach(t => t.stop());
+      const blob = new Blob(chunks, { type: mime });
+      await decodeBlob(blob);
+    };
+    mediaRecorder.start();
+    isRecording = true;
+    recBtn.classList.add('active');
+    recBtn.textContent = '■ Stop';
+    setStatus('recording...');
+  } catch (err) {
+    setStatus('mic denied: ' + err.name);
+    console.error(err);
+  }
+}
+
+function stopRecording() {
+  if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+    mediaRecorder.stop();
+  }
+  isRecording = false;
+  recBtn.classList.remove('active');
+  recBtn.textContent = '● Record';
 }
 
 function play(buffer, label) {
@@ -218,7 +282,12 @@ function play(buffer, label) {
   src.onended = () => setStatus('idle');
 }
 
-fileInput.addEventListener('change', e => handleFile(e.target.files[0]));
+recBtn.addEventListener('click', () => {
+  if (isRecording) stopRecording(); else startRecording();
+});
+fileInput.addEventListener('change', e => {
+  if (e.target.files[0]) decodeBlob(e.target.files[0]);
+});
 playBtn.addEventListener('click', () => play(originalBuffer, 'original'));
 revBtn.addEventListener('click', () => play(reversedBuffer, 'reversed'));
 </script>
