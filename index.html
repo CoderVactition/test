@@ -23,8 +23,8 @@
   .row .play:disabled { opacity:0.2; }
   .row .play .num { font-family:'Fraunces',serif; font-weight:300; font-size:32px; line-height:1; color:var(--gold); width:28px; flex-shrink:0; }
   .row .play .label { flex:1; display:flex; flex-direction:column; gap:4px; }
-  .row .play .title { font-size:14px; letter-spacing:0.12em; text-transform:uppercase; font-weight:500; }
-  .row .play .meta { font-size:9px; color:var(--dim); letter-spacing:0.2em; text-transform:uppercase; }
+  .row .play .title { font-size:13px; letter-spacing:0.08em; text-transform:uppercase; font-weight:500; }
+  .row .play .meta { font-size:9px; color:var(--dim); letter-spacing:0.18em; text-transform:uppercase; }
   .row .play .arrow { color:var(--dim); font-size:14px; }
   .row .play.now-playing .arrow { color:var(--gold); }
   .row .quickRec { width:60px; border:1px solid var(--line); background:transparent; color:var(--accent); cursor:pointer; -webkit-appearance:none; appearance:none; font-size:18px; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-family:inherit; }
@@ -35,16 +35,8 @@
   .phrase .pLabel { font-size:9px; letter-spacing:0.3em; color:var(--dim); text-transform:uppercase; margin-bottom:8px; }
   .phrase .pText { font-family:'Fraunces',serif; font-style:italic; font-weight:300; font-size:22px; line-height:1.3; color:var(--gold); }
   .phrase .pHint { font-size:8px; letter-spacing:0.25em; color:var(--dim); text-transform:uppercase; margin-top:10px; }
-  input[type=file] { display:none; }
-  .sourceRow { display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-bottom:6px; }
-  .miniBtn { border:1px solid var(--line); padding:12px 8px; text-align:center; cursor:pointer; display:block; font-family:inherit; font-size:10px; letter-spacing:0.2em; text-transform:uppercase; color:var(--dim); background:transparent; -webkit-appearance:none; appearance:none; width:100%; }
-  .miniBtn.recording { background:var(--accent); color:var(--bg); border-color:var(--accent); animation:blink 1s steps(2) infinite; }
-  .recBtn { width:100%; border:1px solid var(--accent); color:var(--accent); padding:14px; font-size:11px; letter-spacing:0.25em; text-transform:uppercase; background:transparent; cursor:pointer; margin-bottom:18px; font-family:inherit; -webkit-appearance:none; appearance:none; }
-  .recBtn:disabled { opacity:0.2; }
-  .recBtn.recording { background:var(--accent); color:var(--bg); animation:blink 1s steps(2) infinite; }
   @keyframes blink { 0%,100% { opacity:1; } 50% { opacity:0.65; } }
-  canvas { width:100%; height:64px; display:block; background:#06050a; border:1px solid var(--line); margin-bottom:18px; }
-  .exportBtn { width:100%; margin-top:4px; padding:16px; background:var(--gold); color:var(--bg); border:1px solid var(--gold); font-family:inherit; font-size:11px; font-weight:500; letter-spacing:0.3em; text-transform:uppercase; cursor:pointer; -webkit-appearance:none; appearance:none; }
+  .exportBtn { width:100%; padding:16px; background:var(--gold); color:var(--bg); border:1px solid var(--gold); font-family:inherit; font-size:11px; font-weight:500; letter-spacing:0.3em; text-transform:uppercase; cursor:pointer; -webkit-appearance:none; appearance:none; }
   .exportBtn:disabled { opacity:0.2; background:transparent; color:var(--gold); }
   .status { margin-top:14px; padding-top:12px; border-top:1px solid var(--line); font-size:9px; color:var(--dim); display:flex; justify-content:space-between; letter-spacing:0.2em; text-transform:uppercase; }
   .status span:last-child { color:var(--ink); }
@@ -55,24 +47,24 @@
     <div class="header">
       <div class="dot"></div>
       <span class="brand">BACKMASK</span>
-      <span class="ver">v.08</span>
+      <span class="ver">v.10</span>
     </div>
     <h1>Sing it<br><em>backwards.</em></h1>
     <div class="stack">
       <div class="row">
-        <button id="bA" class="play" disabled><span class="num">A</span><span class="label"><span class="title">Original</span><span class="meta">source</span></span><span class="arrow">▶</span></button>
+        <button id="bA" class="play" disabled><span class="num">A</span><span class="label"><span class="title">Start singing here!</span><span class="meta">your source clip</span></span><span class="arrow">▶</span></button>
         <button id="quickA" class="quickRec">●</button>
       </div>
       <div class="row">
-        <button id="bB" class="play" disabled><span class="num">B</span><span class="label"><span class="title">Reversed</span><span class="meta">source flipped</span></span><span class="arrow">▶</span></button>
+        <button id="bB" class="play" disabled><span class="num">B</span><span class="label"><span class="title">Play this for your friend</span><span class="meta">reversed source</span></span><span class="arrow">▶</span></button>
         <span class="quickSpacer"></span>
       </div>
       <div class="row">
-        <button id="bC" class="play" disabled><span class="num">C</span><span class="label"><span class="title">Your Try</span><span class="meta">raw mimic</span></span><span class="arrow">▶</span></button>
+        <button id="bC" class="play" disabled><span class="num">C</span><span class="label"><span class="title">Record your friend</span><span class="meta">their mimic</span></span><span class="arrow">▶</span></button>
         <button id="quickC" class="quickRec" disabled>●</button>
       </div>
       <div class="row">
-        <button id="bD" class="play" disabled><span class="num">D</span><span class="label"><span class="title">Try Reversed</span><span class="meta">mimic flipped</span></span><span class="arrow">▶</span></button>
+        <button id="bD" class="play" disabled><span class="num">D</span><span class="label"><span class="title">See how they did</span><span class="meta">mimic flipped</span></span><span class="arrow">▶</span></button>
         <span class="quickSpacer"></span>
       </div>
     </div>
@@ -81,13 +73,6 @@
       <div class="pText" id="phraseText">tap to roll a phrase</div>
       <div class="pHint">tap again to reroll</div>
     </button>
-    <div class="sourceRow">
-      <label class="miniBtn" for="file">load file</label>
-      <button id="recSrcBtn" class="miniBtn">● rec source</button>
-    </div>
-    <input type="file" id="file" />
-    <button id="recBtn" class="recBtn" disabled>● record your try</button>
-    <canvas id="wave"></canvas>
     <button id="exportBtn" class="exportBtn" disabled>↓ export full mix</button>
     <div class="status">
       <span>signal</span>
@@ -98,7 +83,7 @@
 const ADJ=['sleepy','tiny','golden','dusty','sneaky','electric','ancient','salty','wild','frozen','lonely','broken','secret','restless','dizzy','crooked','silver','hollow','tangled','bitter','gentle','rusty','hidden','foolish','clever','lucky','glowing','quiet','bored','furious','enormous','invisible'];
 const NOUN=['cat','wizard','robot','ghost','dragon','pirate','moon','river','mountain','tower','garden','kitchen','bicycle','rocket','mirror','shadow','whisper','dream','jacket','ocean','forest','candle','train','balloon','telephone','painting','monster','pickle','bagel','cloud','magnet','pillow','mailman','grandma','penguin','submarine','volcano','lighthouse','sandwich','umbrella'];
 const VERB=['kissed','chased','sang to','waved at','painted','juggled','swallowed','hugged','photographed','hypnotized','ignored','followed','stole','untangled','balanced','broke','married','tickled','interviewed','arrested','befriended','outran','impressed','fed','tackled','rescued','annoyed','copied','outsmarted','warned'];
-const TEMPLATES=['The {adj} {noun} {verb} my {noun}.','A {adj} {noun} {verb} the {adj} {noun}.','Yesterday I saw a {noun} {verb} a {noun}.','Never trust a {adj} {noun} with a {noun}.','My {noun} {verb} the {adj} {noun} last night.','Every {adj} {noun} secretly {verb} the {noun}.'];
+const TEMPLATES=['{adj} {noun}','{adj} {adj} {noun}','the {adj} {noun}','{noun} and {noun}','{verb} the {noun}','{adj} {noun} {verb}'];
 function pick(a){return a[Math.floor(Math.random()*a.length)];}
 function generatePhrase(){return pick(TEMPLATES).replace(/\{(adj|noun|verb)\}/g,(_,k)=>k==='adj'?pick(ADJ):k==='noun'?pick(NOUN):pick(VERB));}
 
@@ -106,9 +91,6 @@ const phraseBtn=document.getElementById('phraseBtn');
 const phraseText=document.getElementById('phraseText');
 phraseBtn.addEventListener('click',()=>{phraseText.textContent='"'+generatePhrase()+'"';});
 
-const fileInput=document.getElementById('file');
-const recSrcBtn=document.getElementById('recSrcBtn');
-const recBtn=document.getElementById('recBtn');
 const quickA=document.getElementById('quickA');
 const quickC=document.getElementById('quickC');
 const exportBtn=document.getElementById('exportBtn');
@@ -117,8 +99,6 @@ const bB=document.getElementById('bB');
 const bC=document.getElementById('bC');
 const bD=document.getElementById('bD');
 const statusEl=document.getElementById('status');
-const canvas=document.getElementById('wave');
-const ctx=canvas.getContext('2d');
 
 let audioCtx;
 const buffers={A:null,B:null,C:null,D:null};
@@ -127,38 +107,6 @@ let activeRecorder=null,activeChunks=[],activeMode=null;
 
 function setStatus(s){statusEl.textContent=s;}
 function refreshExportBtn(){exportBtn.disabled=!['A','B','C','D'].some(k=>buffers[k]);}
-
-function resizeCanvas(){
-  const dpr=window.devicePixelRatio||1;
-  canvas.width=canvas.offsetWidth*dpr;
-  canvas.height=canvas.offsetHeight*dpr;
-  ctx.setTransform(1,0,0,1,0,0);
-  ctx.scale(dpr,dpr);
-}
-resizeCanvas();
-window.addEventListener('resize',resizeCanvas);
-
-function drawWave(buffer){
-  const w=canvas.offsetWidth,h=canvas.offsetHeight;
-  ctx.clearRect(0,0,w,h);
-  if(!buffer)return;
-  const data=buffer.getChannelData(0);
-  const step=Math.ceil(data.length/w);
-  ctx.strokeStyle='#d4a574';
-  ctx.lineWidth=1;
-  ctx.beginPath();
-  for(let x=0;x<w;x++){
-    let min=1,max=-1;
-    for(let i=0;i<step;i++){
-      const v=data[x*step+i]||0;
-      if(v<min)min=v;
-      if(v>max)max=v;
-    }
-    ctx.moveTo(x,(1+min)*h/2);
-    ctx.lineTo(x,(1+max)*h/2);
-  }
-  ctx.stroke();
-}
 
 function reverseBuffer(buffer){
   const r=audioCtx.createBuffer(buffer.numberOfChannels,buffer.length,buffer.sampleRate);
@@ -190,20 +138,8 @@ function loadSource(buffer){
   bB.disabled=false;
   bC.disabled=true;
   bD.disabled=true;
-  recBtn.disabled=false;
   quickC.disabled=false;
-  drawWave(buffer);
   refreshExportBtn();
-}
-
-async function handleFile(file){
-  if(!file)return;
-  setStatus('decoding...');
-  try{
-    const buf=await decodeBlob(file);
-    loadSource(buf);
-    setStatus('source loaded');
-  }catch(err){setStatus('decode failed');}
 }
 
 async function startRecording(mode){
@@ -228,7 +164,6 @@ async function startRecording(mode){
           buffers.D=reverseBuffer(buf);
           bC.disabled=false;
           bD.disabled=false;
-          drawWave(buf);
           setStatus('try ready');
           refreshExportBtn();
         }
@@ -244,18 +179,11 @@ async function startRecording(mode){
 }
 
 function setRecButtonsUI(mode){
-  if(mode==='source'){
-    recSrcBtn.classList.add('recording');recSrcBtn.textContent='■ stop';
-    quickA.classList.add('recording');quickA.textContent='■';
-  }else{
-    recBtn.classList.add('recording');recBtn.textContent='■ stop';
-    quickC.classList.add('recording');quickC.textContent='■';
-  }
+  if(mode==='source'){quickA.classList.add('recording');quickA.textContent='■';}
+  else{quickC.classList.add('recording');quickC.textContent='■';}
 }
 
 function resetRecButtonsUI(){
-  recSrcBtn.classList.remove('recording');recSrcBtn.textContent='● rec source';
-  recBtn.classList.remove('recording');recBtn.textContent='● record your try';
   quickA.classList.remove('recording');quickA.textContent='●';
   quickC.classList.remove('recording');quickC.textContent='●';
 }
@@ -277,7 +205,6 @@ async function play(key,btn,label){
   currentSource=src;
   currentBtn=btn;
   btn.classList.add('now-playing');
-  drawWave(buffer);
   setStatus('playing '+label);
   src.onended=()=>{
     btn.classList.remove('now-playing');
@@ -349,9 +276,6 @@ async function exportMix(){
   refreshExportBtn();
 }
 
-fileInput.addEventListener('change',e=>handleFile(e.target.files[0]));
-recSrcBtn.addEventListener('click',()=>{if(activeMode==='source')stopRecording();else if(!activeMode)startRecording('source');});
-recBtn.addEventListener('click',()=>{if(activeMode==='try')stopRecording();else if(!activeMode)startRecording('try');});
 quickA.addEventListener('click',()=>{if(activeMode==='source')stopRecording();else if(!activeMode)startRecording('source');});
 quickC.addEventListener('click',()=>{if(activeMode==='try')stopRecording();else if(!activeMode)startRecording('try');});
 bA.addEventListener('click',()=>play('A',bA,'original'));
