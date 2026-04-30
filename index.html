@@ -12,7 +12,7 @@
     <div class="header">
       <div class="dot"></div>
       <span class="brand">BACKMASK</span>
-      <span class="ver">v.14</span>
+      <span class="ver">v.15</span>
     </div>
     <h1>Sing it <em>backwards.</em></h1>
     <div class="stack">
@@ -81,9 +81,11 @@ function updateNextUp(){
     bA.classList.add('next-up');
     return;
   }
+  bA.classList.add('next-up');
   bB.classList.add('next-up');
   quickC.classList.add('next-up');
-  if(buffers.C){bD.classList.add('next-up');}
+  bC.classList.add('next-up');
+  bD.classList.add('next-up');
 }
 updateNextUp();
 
