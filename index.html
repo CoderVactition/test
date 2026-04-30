@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
 <title>BACKMASK</title>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,500;9..144,900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,ital,wght@9..144,0,300;9..144,0,500;9..144,1,300;9..144,1,500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   :root {
     --bg: #0a0908;
@@ -31,7 +31,7 @@
     width: 100%;
     max-width: 480px;
     border: 1px solid var(--line);
-    padding: 28px 24px;
+    padding: 24px 22px;
     background: rgba(15,12,10,0.4);
   }
   .header {
@@ -41,12 +41,11 @@
     font-size: 10px;
     letter-spacing: 0.25em;
     color: var(--dim);
-    margin-bottom: 24px;
+    margin-bottom: 18px;
     text-transform: uppercase;
   }
   .dot {
-    width: 6px;
-    height: 6px;
+    width: 6px; height: 6px;
     border-radius: 50%;
     background: var(--gold);
     box-shadow: 0 0 8px var(--gold);
@@ -56,158 +55,202 @@
   h1 {
     font-family: 'Fraunces', serif;
     font-weight: 300;
-    font-size: 38px;
-    line-height: 1;
+    font-size: 32px;
+    line-height: 0.95;
     letter-spacing: -0.02em;
-    margin-bottom: 16px;
+    margin-bottom: 18px;
   }
   h1 em {
     font-style: italic;
     color: var(--gold);
     font-weight: 500;
   }
-  .sub {
-    color: var(--dim);
-    font-size: 11px;
-    line-height: 1.6;
-    margin-bottom: 24px;
-  }
-  .stage {
+  .phrase {
     border: 1px solid var(--line);
-    padding: 14px;
-    margin-bottom: 22px;
+    padding: 18px 16px;
+    margin-bottom: 18px;
+    text-align: center;
+    cursor: pointer;
+    -webkit-appearance: none;
+    appearance: none;
+    background: transparent;
+    width: 100%;
+    color: var(--ink);
+    font-family: inherit;
+    display: block;
   }
-  .stageLabel {
+  .phrase .pLabel {
     font-size: 9px;
+    letter-spacing: 0.3em;
+    color: var(--dim);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .phrase .pText {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-weight: 300;
+    font-size: 22px;
+    line-height: 1.3;
+    color: var(--gold);
+  }
+  .phrase .pHint {
+    font-size: 8px;
     letter-spacing: 0.25em;
     color: var(--dim);
     text-transform: uppercase;
-    margin-bottom: 10px;
+    margin-top: 10px;
   }
-  .stageLabel b { color: var(--gold); font-weight: 500; }
+  input[type=file] { display: none; }
   .sourceRow {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 6px;
+    margin-bottom: 6px;
   }
-  .drop, .recSrcBtn, .recBtn {
-    border: 1px dashed var(--line);
-    padding: 14px 8px;
+  .miniBtn {
+    border: 1px solid var(--line);
+    padding: 12px 8px;
     text-align: center;
     cursor: pointer;
     display: block;
     font-family: inherit;
     font-size: 10px;
-    letter-spacing: 0.15em;
+    letter-spacing: 0.2em;
     text-transform: uppercase;
-    color: var(--ink);
+    color: var(--dim);
     background: transparent;
     -webkit-appearance: none;
     appearance: none;
     width: 100%;
   }
-  .recSrcBtn, .recBtn {
-    border: 1px solid var(--line);
-  }
-  .recSrcBtn.recording, .recBtn.recording {
+  .miniBtn.recording {
     background: var(--accent);
     color: var(--bg);
     border-color: var(--accent);
     animation: blink 1s steps(2) infinite;
   }
-  @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.65; } }
-  .drop .hint { color: var(--dim); font-size: 9px; margin-top: 4px; letter-spacing: 0.2em; }
-  input[type=file] { display: none; }
   .recBtn {
+    width: 100%;
     border: 1px solid var(--accent);
     color: var(--accent);
-    padding: 16px;
-    font-size: 12px;
+    padding: 14px;
+    font-size: 11px;
     letter-spacing: 0.25em;
+    text-transform: uppercase;
+    background: transparent;
+    cursor: pointer;
+    margin-bottom: 18px;
+    font-family: inherit;
+    -webkit-appearance: none;
+    appearance: none;
   }
-  .recBtn:disabled { opacity: 0.25; }
+  .recBtn:disabled { opacity: 0.2; }
+  .recBtn.recording {
+    background: var(--accent);
+    color: var(--bg);
+    animation: blink 1s steps(2) infinite;
+  }
+  @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.65; } }
   canvas {
     width: 100%;
-    height: 80px;
+    height: 64px;
     display: block;
     background: #06050a;
     border: 1px solid var(--line);
-  }
-  .trackLabel {
-    font-size: 9px;
-    color: var(--dim);
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    padding: 8px 0;
     margin-bottom: 18px;
-    text-align: center;
-    border-bottom: 1px solid var(--line);
   }
-  .grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 6px;
+  .stack {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
   }
-  .grid button {
+  .stack button {
+    width: 100%;
     font-family: inherit;
     background: transparent;
     color: var(--ink);
     border: 1px solid var(--line);
     cursor: pointer;
-    padding: 14px 12px;
+    padding: 22px 20px;
     text-align: left;
     -webkit-appearance: none;
     appearance: none;
-    position: relative;
     transition: border-color 0.15s ease, background 0.15s ease;
+    display: flex;
+    align-items: center;
+    gap: 18px;
   }
-  .grid button.now-playing {
+  .stack button.now-playing {
     border-color: var(--gold);
     background: rgba(212, 165, 116, 0.06);
   }
-  .grid button:disabled { opacity: 0.2; }
-  .grid button .num {
-    position: absolute;
-    top: 8px;
-    right: 10px;
+  .stack button:disabled { opacity: 0.2; }
+  .stack button .num {
+    font-family: 'Fraunces', serif;
+    font-weight: 300;
+    font-size: 32px;
+    line-height: 1;
+    color: var(--gold);
+    width: 28px;
+    flex-shrink: 0;
+  }
+  .stack button .label {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .stack button .title {
+    font-size: 14px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    font-weight: 500;
+  }
+  .stack button .meta {
     font-size: 9px;
     color: var(--dim);
-    letter-spacing: 0.1em;
-  }
-  .grid button .title {
-    display: block;
-    font-size: 12px;
-    letter-spacing: 0.1em;
+    letter-spacing: 0.2em;
     text-transform: uppercase;
-    margin-bottom: 4px;
   }
-  .grid button .meta {
-    display: block;
-    font-size: 9px;
+  .stack button .arrow {
     color: var(--dim);
-    letter-spacing: 0.15em;
+    font-size: 14px;
+  }
+  .stack button.now-playing .arrow { color: var(--gold); }
+  .exportBtn {
+    width: 100%;
+    margin-top: 14px;
+    padding: 16px;
+    background: var(--gold);
+    color: var(--bg);
+    border: 1px solid var(--gold);
+    font-family: inherit;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.3em;
     text-transform: uppercase;
+    cursor: pointer;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+  .exportBtn:disabled {
+    opacity: 0.2;
+    background: transparent;
+    color: var(--gold);
   }
   .status {
-    margin-top: 18px;
-    padding-top: 14px;
+    margin-top: 14px;
+    padding-top: 12px;
     border-top: 1px solid var(--line);
-    font-size: 10px;
+    font-size: 9px;
     color: var(--dim);
     display: flex;
     justify-content: space-between;
-    letter-spacing: 0.15em;
+    letter-spacing: 0.2em;
     text-transform: uppercase;
   }
   .status span:last-child { color: var(--ink); }
-  .ios-note {
-    font-size: 9px;
-    color: var(--dim);
-    text-align: center;
-    margin-top: 12px;
-    letter-spacing: 0.1em;
-    font-style: italic;
-  }
 </style>
 </head>
 <body>
@@ -215,82 +258,124 @@
     <div class="header">
       <div class="dot"></div>
       <span class="brand">BACKMASK</span>
-      <span class="ver">v.02</span>
+      <span class="ver">v.05</span>
     </div>
 
     <h1>Sing it<br><em>backwards.</em></h1>
-    <p class="sub">Make a source clip. Hear it reversed. Mimic that reversed sound. Reverse your mimic. If you nailed it, your mimic-flipped echoes the original.</p>
 
-    <div class="stage">
-      <div class="stageLabel"><b>step 1</b> · load or record source</div>
-      <div class="sourceRow">
-        <label class="drop" for="file">
-          load file
-          <div class="hint">mp3 · m4a · wav</div>
-        </label>
-        <button id="recSrcBtn" class="recSrcBtn">● record source</button>
-      </div>
-      <input type="file" id="file" />
-    </div>
+    <button id="phraseBtn" class="phrase">
+      <div class="pLabel">↻ phrase</div>
+      <div class="pText" id="phraseText">tap to roll a phrase</div>
+      <div class="pHint">tap again to reroll</div>
+    </button>
 
-    <div class="stage">
-      <div class="stageLabel"><b>step 2</b> · record your reversed mimic</div>
-      <button id="recBtn" class="recBtn" disabled>● record your try</button>
+    <div class="sourceRow">
+      <label class="miniBtn" for="file">load file</label>
+      <button id="recSrcBtn" class="miniBtn">● rec source</button>
     </div>
+    <input type="file" id="file" />
+
+    <button id="recBtn" class="recBtn" disabled>● record your try</button>
 
     <canvas id="wave"></canvas>
-    <div class="trackLabel" id="trackLabel">— no clip loaded —</div>
 
-    <div class="grid">
+    <div class="stack">
       <button id="bA" disabled>
         <span class="num">A</span>
-        <span class="title">Original</span>
-        <span class="meta">source</span>
+        <span class="label">
+          <span class="title">Original</span>
+          <span class="meta">source</span>
+        </span>
+        <span class="arrow">▶</span>
       </button>
       <button id="bB" disabled>
         <span class="num">B</span>
-        <span class="title">Reversed</span>
-        <span class="meta">source flipped</span>
+        <span class="label">
+          <span class="title">Reversed</span>
+          <span class="meta">source flipped</span>
+        </span>
+        <span class="arrow">▶</span>
       </button>
       <button id="bC" disabled>
         <span class="num">C</span>
-        <span class="title">Your Try</span>
-        <span class="meta">raw mimic</span>
+        <span class="label">
+          <span class="title">Your Try</span>
+          <span class="meta">raw mimic</span>
+        </span>
+        <span class="arrow">▶</span>
       </button>
       <button id="bD" disabled>
         <span class="num">D</span>
-        <span class="title">Try Reversed</span>
-        <span class="meta">mimic flipped</span>
+        <span class="label">
+          <span class="title">Try Reversed</span>
+          <span class="meta">mimic flipped</span>
+        </span>
+        <span class="arrow">▶</span>
       </button>
     </div>
+
+    <button id="exportBtn" class="exportBtn" disabled>↓ export full mix</button>
 
     <div class="status">
       <span>signal</span>
       <span id="status">idle</span>
     </div>
-
-    <div class="ios-note">iOS: flip silent switch off for sound</div>
   </div>
 
 <script>
+const ADJ = ['sleepy','tiny','golden','dusty','sneaky','electric','ancient','salty','wild','frozen','lonely','broken','secret','restless','dizzy','crooked','silver','hollow','tangled','bitter','gentle','rusty','hidden','foolish','clever','lucky','glowing','quiet','bored','furious','enormous','invisible'];
+const NOUN = ['cat','wizard','robot','ghost','dragon','pirate','moon','river','mountain','tower','garden','kitchen','bicycle','rocket','mirror','shadow','whisper','dream','jacket','ocean','forest','candle','train','balloon','telephone','painting','monster','pickle','bagel','cloud','magnet','pillow','mailman','grandma','penguin','submarine','volcano','lighthouse','sandwich','umbrella'];
+const VERB = ['kissed','chased','sang to','waved at','painted','juggled','swallowed','hugged','photographed','hypnotized','ignored','followed','stole','untangled','balanced','broke','married','tickled','interviewed','arrested','befriended','outran','impressed','fed','tackled','rescued','annoyed','copied','outsmarted','warned'];
+
+const TEMPLATES = [
+  'The {adj} {noun} {verb} my {noun}.',
+  'A {adj} {noun} {verb} the {adj} {noun}.',
+  'Yesterday I saw a {noun} {verb} a {noun}.',
+  'Never trust a {adj} {noun} with a {noun}.',
+  'My {noun} {verb} the {adj} {noun} last night.',
+  'Every {adj} {noun} secretly {verb} the {noun}.'
+];
+
+function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+function generatePhrase() {
+  const t = pick(TEMPLATES);
+  return t.replace(/\{(adj|noun|verb)\}/g, (_, kind) => {
+    if (kind === 'adj') return pick(ADJ);
+    if (kind === 'noun') return pick(NOUN);
+    return pick(VERB);
+  });
+}
+
+const phraseBtn = document.getElementById('phraseBtn');
+const phraseText = document.getElementById('phraseText');
+phraseBtn.addEventListener('click', () => {
+  phraseText.textContent = '"' + generatePhrase() + '"';
+});
+
 const fileInput = document.getElementById('file');
 const recSrcBtn = document.getElementById('recSrcBtn');
 const recBtn = document.getElementById('recBtn');
+const exportBtn = document.getElementById('exportBtn');
 const bA = document.getElementById('bA');
 const bB = document.getElementById('bB');
 const bC = document.getElementById('bC');
 const bD = document.getElementById('bD');
 const statusEl = document.getElementById('status');
-const trackLabel = document.getElementById('trackLabel');
 const canvas = document.getElementById('wave');
 const ctx = canvas.getContext('2d');
 
 let audioCtx;
 const buffers = { A: null, B: null, C: null, D: null };
 let currentSource, currentBtn;
-let activeRecorder = null, activeStream = null, activeChunks = [], activeMode = null;
+let activeRecorder = null, activeChunks = [], activeMode = null;
 
 function setStatus(s) { statusEl.textContent = s; }
+
+function refreshExportBtn() {
+  const any = ['A','B','C','D'].some(k => buffers[k]);
+  exportBtn.disabled = !any;
+}
 
 function resizeCanvas() {
   const dpr = window.devicePixelRatio || 1;
@@ -356,19 +441,18 @@ function loadSource(buffer) {
   bD.disabled = true;
   recBtn.disabled = false;
   drawWave(buffer);
-  trackLabel.textContent = 'source · ' + buffer.duration.toFixed(2) + 's';
+  refreshExportBtn();
 }
 
 async function handleFile(file) {
   if (!file) return;
-  setStatus('decoding source...');
+  setStatus('decoding...');
   try {
     const buf = await decodeBlob(file);
     loadSource(buf);
-    setStatus('source loaded · play B then record your try');
+    setStatus('source loaded');
   } catch (err) {
     setStatus('decode failed');
-    console.error(err);
   }
 }
 
@@ -376,7 +460,6 @@ async function startRecording(mode) {
   await ensureCtx();
   try {
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    activeStream = stream;
     activeChunks = [];
     activeMode = mode;
     let mime = '';
@@ -391,15 +474,15 @@ async function startRecording(mode) {
         const buf = await decodeBlob(blob);
         if (mode === 'source') {
           loadSource(buf);
-          setStatus('source recorded · play B then record your try');
+          setStatus('source recorded');
         } else {
           buffers.C = buf;
           buffers.D = reverseBuffer(buf);
           bC.disabled = false;
           bD.disabled = false;
           drawWave(buf);
-          trackLabel.textContent = 'try · ' + buf.duration.toFixed(2) + 's';
-          setStatus('try ready · compare A·B·C·D');
+          setStatus('try ready');
+          refreshExportBtn();
         }
       } catch (err) {
         setStatus('decode failed');
@@ -411,11 +494,11 @@ async function startRecording(mode) {
     if (mode === 'source') {
       recSrcBtn.classList.add('recording');
       recSrcBtn.textContent = '■ stop';
-      setStatus('recording source...');
+      setStatus('recording source');
     } else {
       recBtn.classList.add('recording');
       recBtn.textContent = '■ stop';
-      setStatus('recording your try...');
+      setStatus('recording try');
     }
   } catch (err) {
     setStatus('mic denied');
@@ -425,7 +508,7 @@ async function startRecording(mode) {
 function stopRecording() {
   if (activeRecorder && activeRecorder.state !== 'inactive') activeRecorder.stop();
   recSrcBtn.classList.remove('recording');
-  recSrcBtn.innerHTML = '● record source';
+  recSrcBtn.textContent = '● rec source';
   recBtn.classList.remove('recording');
   recBtn.textContent = '● record your try';
 }
@@ -444,12 +527,98 @@ async function play(key, btn, label) {
   currentBtn = btn;
   btn.classList.add('now-playing');
   drawWave(buffer);
-  setStatus('playing · ' + label);
+  setStatus('playing ' + label);
   src.onended = () => {
     btn.classList.remove('now-playing');
     if (currentBtn === btn) currentBtn = null;
     setStatus('idle');
   };
+}
+
+function encodeWAV(buffer) {
+  const numChannels = buffer.numberOfChannels;
+  const sampleRate = buffer.sampleRate;
+  const length = buffer.length;
+  const blockAlign = numChannels * 2;
+  const dataSize = length * blockAlign;
+  const ab = new ArrayBuffer(44 + dataSize);
+  const view = new DataView(ab);
+  const writeStr = (off, s) => { for (let i = 0; i < s.length; i++) view.setUint8(off + i, s.charCodeAt(i)); };
+  writeStr(0, 'RIFF');
+  view.setUint32(4, 36 + dataSize, true);
+  writeStr(8, 'WAVE');
+  writeStr(12, 'fmt ');
+  view.setUint32(16, 16, true);
+  view.setUint16(20, 1, true);
+  view.setUint16(22, numChannels, true);
+  view.setUint32(24, sampleRate, true);
+  view.setUint32(28, sampleRate * blockAlign, true);
+  view.setUint16(32, blockAlign, true);
+  view.setUint16(34, 16, true);
+  writeStr(36, 'data');
+  view.setUint32(40, dataSize, true);
+  let offset = 44;
+  const channels = [];
+  for (let ch = 0; ch < numChannels; ch++) channels.push(buffer.getChannelData(ch));
+  for (let i = 0; i < length; i++) {
+    for (let ch = 0; ch < numChannels; ch++) {
+      let s = Math.max(-1, Math.min(1, channels[ch][i]));
+      view.setInt16(offset, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
+      offset += 2;
+    }
+  }
+  return new Blob([ab], { type: 'audio/wav' });
+}
+
+async function exportMix() {
+  const order = ['A','B','C','D'];
+  const list = order.map(k => buffers[k]).filter(b => b);
+  if (!list.length) return;
+  exportBtn.disabled = true;
+  setStatus('rendering...');
+  try {
+    await ensureCtx();
+    const sr = audioCtx.sampleRate;
+    const gap = 0.6;
+    let total = 0;
+    for (const b of list) total += b.duration;
+    total += gap * (list.length - 1);
+    const offline = new OfflineAudioContext(1, Math.ceil(total * sr), sr);
+    let t = 0;
+    for (let i = 0; i < list.length; i++) {
+      const src = offline.createBufferSource();
+      src.buffer = list[i];
+      src.connect(offline.destination);
+      src.start(t);
+      t += list[i].duration + gap;
+    }
+    const rendered = await offline.startRendering();
+    const wav = encodeWAV(rendered);
+    const stamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+    const filename = 'backmask-' + stamp + '.wav';
+    const file = new File([wav], filename, { type: 'audio/wav' });
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      try {
+        await navigator.share({ files: [file], title: 'BACKMASK' });
+        setStatus('exported');
+      } catch (err) {
+        setStatus(err.name === 'AbortError' ? 'cancelled' : 'share failed');
+      }
+    } else {
+      const url = URL.createObjectURL(wav);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(url), 2000);
+      setStatus('downloaded');
+    }
+  } catch (err) {
+    setStatus('export failed');
+  }
+  refreshExportBtn();
 }
 
 fileInput.addEventListener('change', e => handleFile(e.target.files[0]));
@@ -465,6 +634,7 @@ bA.addEventListener('click', () => play('A', bA, 'original'));
 bB.addEventListener('click', () => play('B', bB, 'reversed'));
 bC.addEventListener('click', () => play('C', bC, 'your try'));
 bD.addEventListener('click', () => play('D', bD, 'try reversed'));
+exportBtn.addEventListener('click', exportMix);
 </script>
 </body>
 </html>
