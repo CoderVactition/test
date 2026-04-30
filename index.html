@@ -5,19 +5,19 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
 <title>BACKMASK</title>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,ital,wght@9..144,0,300;9..144,0,500;9..144,1,300;9..144,1,500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<style>:root{--bg:#0a0908;--ink:#f4ede4;--dim:#6b6358;--accent:#e63946;--gold:#d4a574;--line:#2a2622}*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}body{background:var(--bg);color:var(--ink);font-family:'JetBrains Mono',monospace;min-height:100vh;min-height:100dvh;display:flex;align-items:center;justify-content:center;padding:20px;background-image:repeating-linear-gradient(0deg,rgba(255,255,255,0.015) 0,rgba(255,255,255,0.015) 1px,transparent 1px,transparent 3px)}.frame{width:100%;max-width:480px;border:1px solid var(--line);padding:24px 22px;background:rgba(15,12,10,0.4)}.header{display:flex;align-items:center;gap:8px;font-size:10px;letter-spacing:0.25em;color:var(--dim);margin-bottom:18px;text-transform:uppercase}.dot{width:6px;height:6px;border-radius:50%;background:var(--gold);box-shadow:0 0 8px var(--gold)}.brand{color:var(--ink);font-weight:500}.ver{margin-left:auto}h1{font-family:'Fraunces',serif;font-weight:300;font-size:32px;line-height:.95;letter-spacing:-0.02em;margin-bottom:18px}h1 em{font-style:italic;color:var(--gold);font-weight:500}.stack{display:flex;flex-direction:column;gap:8px;margin-bottom:22px}.row{display:flex;gap:6px;align-items:stretch}.row .play{flex:1;font-family:inherit;background:transparent;color:var(--ink);border:1px solid var(--line);cursor:pointer;padding:22px 20px;text-align:left;-webkit-appearance:none;appearance:none;transition:border-color .2s ease,background .2s ease,opacity .2s ease;display:flex;align-items:center;gap:18px}.row .play.now-playing{border-color:var(--gold);background:rgba(212,165,116,0.06)}.row .play:disabled{opacity:.2}.row .play.next-up:not(:disabled){border-color:var(--gold);animation:nextPulse 2s ease-in-out infinite}.row .play.next-up:not(:disabled) .num{color:var(--gold)}@keyframes nextPulse{0%,100%{box-shadow:0 0 0 0 rgba(212,165,116,0);border-color:var(--gold)}50%{box-shadow:0 0 0 4px rgba(212,165,116,0.15);border-color:#e8c294}}.row .play .num{font-family:'Fraunces',serif;font-weight:300;font-size:32px;line-height:1;color:var(--gold);width:28px;flex-shrink:0;transition:color .2s ease}.row .play .label{flex:1;display:flex;flex-direction:column;gap:4px}.row .play .title{font-size:13px;letter-spacing:0.08em;text-transform:uppercase;font-weight:500}.row .play .meta{font-size:9px;color:var(--dim);letter-spacing:0.18em;text-transform:uppercase}.row .play .arrow{color:var(--dim);font-size:14px;transition:color .2s ease}.row .play.now-playing .arrow,.row .play.next-up:not(:disabled) .arrow{color:var(--gold)}.row .quickRec{width:60px;border:1px solid var(--line);background:transparent;color:var(--accent);cursor:pointer;-webkit-appearance:none;appearance:none;font-size:18px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:inherit;transition:border-color .2s ease,background .2s ease}.row .quickRec:disabled{opacity:.3}.row .quickRec.next-up:not(:disabled){border-color:var(--accent);animation:recPulse 1.6s ease-in-out infinite}@keyframes recPulse{0%,100%{box-shadow:0 0 0 0 rgba(230,57,70,0)}50%{box-shadow:0 0 0 4px rgba(230,57,70,0.2)}}.row .quickRec.recording{background:var(--accent);color:var(--bg);border-color:var(--accent);animation:blink 1s steps(2) infinite;font-size:14px}.quickSpacer{width:60px;flex-shrink:0}.phrase{border:1px solid var(--line);padding:18px 16px;margin-bottom:18px;text-align:center;cursor:pointer;-webkit-appearance:none;appearance:none;background:transparent;width:100%;color:var(--ink);font-family:inherit;display:block}.phrase .pLabel{font-size:9px;letter-spacing:0.3em;color:var(--dim);text-transform:uppercase;margin-bottom:8px}.phrase .pText{font-family:'Fraunces',serif;font-style:italic;font-weight:300;font-size:22px;line-height:1.3;color:var(--gold)}.phrase .pHint{font-size:8px;letter-spacing:0.25em;color:var(--dim);text-transform:uppercase;margin-top:10px}@keyframes blink{0%,100%{opacity:1}50%{opacity:.65}}.exportBtn{width:100%;padding:16px;background:var(--gold);color:var(--bg);border:1px solid var(--gold);font-family:inherit;font-size:11px;font-weight:500;letter-spacing:0.3em;text-transform:uppercase;cursor:pointer;-webkit-appearance:none;appearance:none}.exportBtn:disabled{opacity:.2;background:transparent;color:var(--gold)}.status{margin-top:14px;padding-top:12px;border-top:1px solid var(--line);font-size:9px;color:var(--dim);display:flex;justify-content:space-between;letter-spacing:0.2em;text-transform:uppercase}.status span:last-child{color:var(--ink)}</style>
+<style>:root{--bg:#0a0908;--ink:#f4ede4;--dim:#6b6358;--accent:#e63946;--gold:#d4a574;--line:#2a2622}*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}body{background:var(--bg);color:var(--ink);font-family:'JetBrains Mono',monospace;min-height:100vh;min-height:100dvh;display:flex;align-items:center;justify-content:center;padding:20px;background-image:repeating-linear-gradient(0deg,rgba(255,255,255,0.015) 0,rgba(255,255,255,0.015) 1px,transparent 1px,transparent 3px)}.frame{width:100%;max-width:480px;border:1px solid var(--line);padding:24px 22px;background:rgba(15,12,10,0.4)}.header{display:flex;align-items:center;gap:8px;font-size:10px;letter-spacing:0.25em;color:var(--dim);margin-bottom:18px;text-transform:uppercase}.dot{width:6px;height:6px;border-radius:50%;background:var(--gold);box-shadow:0 0 8px var(--gold)}.brand{color:var(--ink);font-weight:500}.ver{margin-left:auto}h1{font-family:'Fraunces',serif;font-weight:300;font-size:28px;line-height:1;letter-spacing:-0.02em;margin-bottom:18px;white-space:nowrap}h1 em{font-style:italic;color:var(--gold);font-weight:500}.stack{display:flex;flex-direction:column;gap:8px;margin-bottom:22px}.row{display:flex;gap:6px;align-items:stretch}.row .play{flex:1;font-family:inherit;background:transparent;color:var(--ink);border:1px solid var(--line);cursor:pointer;padding:22px 20px;text-align:left;-webkit-appearance:none;appearance:none;transition:border-color .2s ease,background .2s ease,opacity .2s ease;display:flex;align-items:center;gap:18px}.row .play.now-playing{border-color:var(--gold);background:rgba(212,165,116,0.06)}.row .play:disabled{opacity:.2}.row .play.next-up:not(:disabled){border-color:var(--gold);animation:nextPulse 2s ease-in-out infinite}.row .play.next-up:not(:disabled) .num{color:var(--gold)}@keyframes nextPulse{0%,100%{box-shadow:0 0 0 0 rgba(212,165,116,0);border-color:var(--gold)}50%{box-shadow:0 0 0 4px rgba(212,165,116,0.15);border-color:#e8c294}}.row .play .num{font-family:'Fraunces',serif;font-weight:300;font-size:32px;line-height:1;color:var(--gold);width:28px;flex-shrink:0;transition:color .2s ease}.row .play .label{flex:1;display:flex;flex-direction:column;gap:4px}.row .play .title{font-size:13px;letter-spacing:0.08em;text-transform:uppercase;font-weight:500}.row .play .meta{font-size:9px;color:var(--dim);letter-spacing:0.18em;text-transform:uppercase}.row .play .arrow{color:var(--dim);font-size:14px;transition:color .2s ease}.row .play.now-playing .arrow,.row .play.next-up:not(:disabled) .arrow{color:var(--gold)}.row .quickRec{width:60px;border:1px solid var(--line);background:transparent;color:var(--accent);cursor:pointer;-webkit-appearance:none;appearance:none;font-size:18px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:inherit;transition:border-color .2s ease,background .2s ease}.row .quickRec:disabled{opacity:.3}.row .quickRec.next-up:not(:disabled){border-color:var(--accent);animation:recPulse 1.6s ease-in-out infinite}@keyframes recPulse{0%,100%{box-shadow:0 0 0 0 rgba(230,57,70,0)}50%{box-shadow:0 0 0 4px rgba(230,57,70,0.2)}}.row .quickRec.recording{background:var(--accent);color:var(--bg);border-color:var(--accent);animation:blink 1s steps(2) infinite;font-size:14px}.quickSpacer{width:60px;flex-shrink:0}.phrase{border:1px solid var(--line);padding:18px 16px;margin-bottom:18px;text-align:center;cursor:pointer;-webkit-appearance:none;appearance:none;background:transparent;width:100%;color:var(--ink);font-family:inherit;display:block}.phrase .pLabel{font-size:9px;letter-spacing:0.3em;color:var(--dim);text-transform:uppercase;margin-bottom:8px}.phrase .pText{font-family:'Fraunces',serif;font-style:italic;font-weight:300;font-size:22px;line-height:1.3;color:var(--gold)}.phrase .pHint{font-size:8px;letter-spacing:0.25em;color:var(--dim);text-transform:uppercase;margin-top:10px}@keyframes blink{0%,100%{opacity:1}50%{opacity:.65}}.exportBtn{width:100%;padding:16px;background:var(--gold);color:var(--bg);border:1px solid var(--gold);font-family:inherit;font-size:11px;font-weight:500;letter-spacing:0.3em;text-transform:uppercase;cursor:pointer;-webkit-appearance:none;appearance:none}.exportBtn:disabled{opacity:.2;background:transparent;color:var(--gold)}.status{margin-top:14px;padding-top:12px;border-top:1px solid var(--line);font-size:9px;color:var(--dim);display:flex;justify-content:space-between;letter-spacing:0.2em;text-transform:uppercase}.status span:last-child{color:var(--ink)}</style>
 </head>
 <body>
   <div class="frame">
     <div class="header">
       <div class="dot"></div>
       <span class="brand">BACKMASK</span>
-      <span class="ver">v.11</span>
+      <span class="ver">v.12</span>
     </div>
-    <h1>Sing it<br><em>backwards.</em></h1>
+    <h1>Sing it <em>backwards.</em></h1>
     <div class="stack">
       <div class="row">
-        <button id="bA" class="play" disabled><span class="num">A</span><span class="label"><span class="title">Start singing here!</span><span class="meta">your source clip</span></span><span class="arrow">▶</span></button>
+        <button id="bA" class="play next-up" disabled><span class="num">A</span><span class="label"><span class="title">Start singing here!</span><span class="meta">your source clip</span></span><span class="arrow">▶</span></button>
         <button id="quickA" class="quickRec next-up">●</button>
       </div>
       <div class="row">
@@ -77,7 +77,7 @@ function refreshExportBtn(){exportBtn.disabled=!['A','B','C','D'].some(k=>buffer
 function clearNextUp(){[quickA,bA,bB,quickC,bC,bD].forEach(el=>el&&el.classList&&el.classList.remove('next-up'));}
 function updateNextUp(){
   clearNextUp();
-  if(!buffers.A){quickA.classList.add('next-up');return;}
+  if(!buffers.A){quickA.classList.add('next-up');bA.classList.add('next-up');return;}
   if(!bPlayed){bB.classList.add('next-up');return;}
   if(!buffers.C){quickC.classList.add('next-up');return;}
   if(!dPlayed){bD.classList.add('next-up');return;}
@@ -135,137 +135,4 @@ async function startRecording(mode){
     activeRecorder.onstop=async()=>{
       stream.getTracks().forEach(t=>t.stop());
       const blob=new Blob(activeChunks,{type:activeRecorder.mimeType});
-      try{
-        const buf=await decodeBlob(blob);
-        if(mode==='source'){loadSource(buf);setStatus('source recorded · play B for friend');}
-        else{
-          buffers.C=buf;
-          buffers.D=reverseBuffer(buf);
-          bC.disabled=false;
-          bD.disabled=false;
-          setStatus('try ready · play D to hear it flipped');
-          refreshExportBtn();
-          updateNextUp();
-        }
-      }catch(err){setStatus('decode failed');}
-      activeRecorder=null;
-      activeMode=null;
-      resetRecButtonsUI();
-    };
-    activeRecorder.start();
-    setRecButtonsUI(mode);
-    setStatus(mode==='source'?'recording source':'recording try');
-  }catch(err){setStatus('mic denied');}
-}
-
-function setRecButtonsUI(mode){
-  if(mode==='source'){quickA.classList.add('recording');quickA.textContent='■';}
-  else{quickC.classList.add('recording');quickC.textContent='■';}
-}
-
-function resetRecButtonsUI(){
-  quickA.classList.remove('recording');quickA.textContent='●';
-  quickC.classList.remove('recording');quickC.textContent='●';
-}
-
-function stopRecording(){
-  if(activeRecorder&&activeRecorder.state!=='inactive')activeRecorder.stop();
-}
-
-async function play(key,btn,label){
-  const buffer=buffers[key];
-  if(!buffer)return;
-  await ensureCtx();
-  if(currentSource){try{currentSource.stop();}catch(e){}}
-  if(currentBtn)currentBtn.classList.remove('now-playing');
-  const src=audioCtx.createBufferSource();
-  src.buffer=buffer;
-  src.connect(audioCtx.destination);
-  src.start();
-  currentSource=src;
-  currentBtn=btn;
-  btn.classList.add('now-playing');
-  setStatus('playing '+label);
-  if(key==='B')bPlayed=true;
-  if(key==='D')dPlayed=true;
-  updateNextUp();
-  src.onended=()=>{
-    btn.classList.remove('now-playing');
-    if(currentBtn===btn)currentBtn=null;
-    setStatus('idle');
-  };
-}
-
-function encodeWAV(buffer){
-  const nc=buffer.numberOfChannels,sr=buffer.sampleRate,len=buffer.length;
-  const ba=nc*2,ds=len*ba;
-  const ab=new ArrayBuffer(44+ds);
-  const v=new DataView(ab);
-  const w=(o,s)=>{for(let i=0;i<s.length;i++)v.setUint8(o+i,s.charCodeAt(i));};
-  w(0,'RIFF');v.setUint32(4,36+ds,true);w(8,'WAVE');w(12,'fmt ');
-  v.setUint32(16,16,true);v.setUint16(20,1,true);v.setUint16(22,nc,true);
-  v.setUint32(24,sr,true);v.setUint32(28,sr*ba,true);v.setUint16(32,ba,true);v.setUint16(34,16,true);
-  w(36,'data');v.setUint32(40,ds,true);
-  let off=44;
-  const chs=[];
-  for(let c=0;c<nc;c++)chs.push(buffer.getChannelData(c));
-  for(let i=0;i<len;i++){
-    for(let c=0;c<nc;c++){
-      let s=Math.max(-1,Math.min(1,chs[c][i]));
-      v.setInt16(off,s<0?s*0x8000:s*0x7FFF,true);
-      off+=2;
-    }
-  }
-  return new Blob([ab],{type:'audio/wav'});
-}
-
-async function exportMix(){
-  const list=['A','B','C','D'].map(k=>buffers[k]).filter(b=>b);
-  if(!list.length)return;
-  exportBtn.disabled=true;
-  setStatus('rendering...');
-  try{
-    await ensureCtx();
-    const sr=audioCtx.sampleRate,gap=0.6;
-    let total=0;
-    for(const b of list)total+=b.duration;
-    total+=gap*(list.length-1);
-    const off=new OfflineAudioContext(1,Math.ceil(total*sr),sr);
-    let t=0;
-    for(let i=0;i<list.length;i++){
-      const s=off.createBufferSource();
-      s.buffer=list[i];
-      s.connect(off.destination);
-      s.start(t);
-      t+=list[i].duration+gap;
-    }
-    const rendered=await off.startRendering();
-    const wav=encodeWAV(rendered);
-    const stamp=new Date().toISOString().replace(/[:.]/g,'-').slice(0,19);
-    const filename='backmask-'+stamp+'.wav';
-    const file=new File([wav],filename,{type:'audio/wav'});
-    if(navigator.canShare&&navigator.canShare({files:[file]})){
-      try{await navigator.share({files:[file],title:'BACKMASK'});setStatus('exported');}
-      catch(err){setStatus(err.name==='AbortError'?'cancelled':'share failed');}
-    }else{
-      const url=URL.createObjectURL(wav);
-      const a=document.createElement('a');
-      a.href=url;a.download=filename;
-      document.body.appendChild(a);a.click();document.body.removeChild(a);
-      setTimeout(()=>URL.revokeObjectURL(url),2000);
-      setStatus('downloaded');
-    }
-  }catch(err){setStatus('export failed');}
-  refreshExportBtn();
-}
-
-quickA.addEventListener('click',()=>{if(activeMode==='source')stopRecording();else if(!activeMode)startRecording('source');});
-quickC.addEventListener('click',()=>{if(activeMode==='try')stopRecording();else if(!activeMode)startRecording('try');});
-bA.addEventListener('click',()=>play('A',bA,'original'));
-bB.addEventListener('click',()=>play('B',bB,'reversed'));
-bC.addEventListener('click',()=>play('C',bC,'your try'));
-bD.addEventListener('click',()=>play('D',bD,'try reversed'));
-exportBtn.addEventListener('click',exportMix);
-</script>
-</body>
-</html>
+      try​​​​​​​​​​​​​​​​
