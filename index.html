@@ -142,13 +142,19 @@
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
+    font-family: inherit;
   }
+  .row .quickRec:disabled { opacity: 0.3; }
   .row .quickRec.recording {
     background: var(--accent);
     color: var(--bg);
     border-color: var(--accent);
     animation: blink 1s steps(2) infinite;
     font-size: 14px;
+  }
+  .quickSpacer {
+    width: 60px;
+    flex-shrink: 0;
   }
   .phrase {
     border: 1px solid var(--line);
@@ -285,7 +291,7 @@
     <div class="header">
       <div class="dot"></div>
       <span class="brand">BACKMASK</span>
-      <span class="ver">v.06</span>
+      <span class="ver">v.07</span>
     </div>
 
     <h1>Sing it<br><em>backwards.</em></h1>
@@ -302,14 +308,17 @@
         </button>
         <button id="quickA" class="quickRec" title="Record source">●</button>
       </div>
-      <button id="bB" class="play" disabled style="width:100%;">
-        <span class="num">B</span>
-        <span class="label">
-          <span class="title">Reversed</span>
-          <span class="meta">source flipped</span>
-        </span>
-        <span class="arrow">▶</span>
-      </button>
+      <div class="row">
+        <button id="bB" class="play" disabled>
+          <span class="num">B</span>
+          <span class="label">
+            <span class="title">Reversed</span>
+            <span class="meta">source flipped</span>
+          </span>
+          <span class="arrow">▶</span>
+        </button>
+        <span class="quickSpacer"></span>
+      </div>
       <div class="row">
         <button id="bC" class="play" disabled>
           <span class="num">C</span>
@@ -321,14 +330,17 @@
         </button>
         <button id="quickC" class="quickRec" disabled title="Record your try">●</button>
       </div>
-      <button id="bD" class="play" disabled style="width:100%;">
-        <span class="num">D</span>
-        <span class="label">
-          <span class="title">Try Reversed</span>
-          <span class="meta">mimic flipped</span>
-        </span>
-        <span class="arrow">▶</span>
-      </button>
+      <div class="row">
+        <button id="bD" class="play" disabled>
+          <span class="num">D</span>
+          <span class="label">
+            <span class="title">Try Reversed</span>
+            <span class="meta">mimic flipped</span>
+          </span>
+          <span class="arrow">▶</span>
+        </button>
+        <span class="quickSpacer"></span>
+      </div>
     </div>
 
     <button id="phraseBtn" class="phrase">
@@ -449,7 +461,7 @@ function reverseBuffer(buffer) {
 
 async function ensureCtx() {
   if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  if (audioCtx.state === 'suspended') await audioCtx.resume();
+  if (audioCtx.state === 'suspended') await audio Ctx.resume();
 }
 
 async function decodeBlob(blob) {
@@ -521,24 +533,20 @@ async function startRecording(mode) {
       resetRecButtonsUI();
     };
     activeRecorder.start();
-    setRecButtonsUI(mode, true);
+    setRecButtonsUI(mode);
     setStatus(mode === 'source' ? 'recording source' : 'recording try');
   } catch (err) {
     setStatus('mic denied');
   }
 }
 
-function setRecButtonsUI(mode, recording) {
+function setRecButtonsUI(mode) {
   if (mode === 'source') {
-    if (recording) {
-      recSrcBtn.classList.add('recording'); recSrcBtn.textContent = '■ stop';
-      quickA.classList.add('recording'); quickA.textContent = '■';
-    }
+    recSrcBtn.classList.add('recording'); recSrcBtn.textContent = '■ stop';
+    quickA.classList.add('recording'); quickA.textContent = '■';
   } else {
-    if (recording) {
-      recBtn.classList.add('recording'); recBtn.textContent = '■ stop';
-      quickC.classList.add('recording'); quickC.textContent = '■';
-    }
+    recBtn.classList.add('recording'); recBtn.textContent = '■ stop';
+    quickC.classList.add('recording'); quickC.textContent = '■';
   }
 }
 
@@ -637,33 +645,6 @@ async function exportMix() {
     const stamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
     const filename = 'backmask-' + stamp + '.wav';
     const file = new File([wav], filename, { type: 'audio/wav' });
-    async function exportMix() {
-  const order = ['A','B','C','D'];
-  const list = order.map(k => buffers[k]).filter(b => b);
-  if (!list.length) return;
-  exportBtn.disabled = true;
-  setStatus('rendering...');
-  try {
-    await ensureCtx();
-    const sr = audioCtx.sampleRate;
-    const gap = 0.6;
-    let total = 0;
-    for (const b of list) total += b.duration;
-    total += gap * (list.length - 1);
-    const offline = new OfflineAudioContext(1, Math.ceil(total * sr), sr);
-    let t = 0;
-    for (let i = 0; i < list.length; i++) {
-      const src = offline.createBufferSource();
-      src.buffer = list[i];
-      src.connect(offline.destination);
-      src.start(t);
-      t += list[i].duration + gap;
-    }
-    const rendered = await offline.startRendering();
-    const wav = encodeWAV(rendered);
-    const stamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
-    const filename = 'backmask-' + stamp + '.wav';
-    const file = new File([wav], filename, { type: 'audio/wav' });
     if (navigator.canShare && navigator.canShare({ files: [file] })) {
       try {
         await navigator.share({ files: [file], title: 'BACKMASK' });
@@ -713,4 +694,5 @@ exportBtn.addEventListener('click', exportMix);
 </script>
 </body>
 </html>
-
+​​​​​​​​​​​​​​​​
+  
