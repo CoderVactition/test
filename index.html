@@ -12,12 +12,12 @@
     <div class="header">
       <div class="dot"></div>
       <span class="brand">BACKMASK</span>
-      <span class="ver">v.12</span>
+      <span class="ver">v.13</span>
     </div>
     <h1>Sing it <em>backwards.</em></h1>
     <div class="stack">
       <div class="row">
-        <button id="bA" class="play next-up" disabled><span class="num">A</span><span class="label"><span class="title">Start singing here!</span><span class="meta">your source clip</span></span><span class="arrow">▶</span></button>
+        <button id="bA" class="play next-up"><span class="num">A</span><span class="label"><span class="title">Start singing here!</span><span class="meta">your source clip</span></span><span class="arrow">▶</span></button>
         <button id="quickA" class="quickRec next-up">●</button>
       </div>
       <div class="row">
@@ -25,7 +25,7 @@
         <span class="quickSpacer"></span>
       </div>
       <div class="row">
-        <button id="bC" class="play" disabled><span class="num">C</span><span class="label"><span class="title">Record your friend</span><span class="meta">their mimic</span></span><span class="arrow">▶</span></button>
+        <button id="bC" class="play" disabled><span class="num">C</span><span class="label"><span class="title">Record your friend saying B</span><span class="meta">their mimic</span></span><span class="arrow">▶</span></button>
         <button id="quickC" class="quickRec" disabled>●</button>
       </div>
       <div class="row">
@@ -112,7 +112,6 @@ function loadSource(buffer){
   buffers.D=null;
   bPlayed=false;
   dPlayed=false;
-  bA.disabled=false;
   bB.disabled=false;
   bC.disabled=true;
   bD.disabled=true;
@@ -135,4 +134,137 @@ async function startRecording(mode){
     activeRecorder.onstop=async()=>{
       stream.getTracks().forEach(t=>t.stop());
       const blob=new Blob(activeChunks,{type:activeRecorder.mimeType});
-      try​​​​​​​​​​​​​​​​
+      try{
+        const buf=await decodeBlob(blob);
+        if(mode==='source'){loadSource(buf);setStatus('source recorded · play B for friend');}
+        else{
+          buffers.C=buf;
+          buffers.D=reverseBuffer(buf);
+          bC.disabled=false;
+          bD.disabled=false;
+          setStatus('try ready · play D to hear it flipped');
+          refreshExportBtn();
+          updateNextUp();
+        }
+      }catch(err){setStatus('decode failed');}
+      activeRecorder=null;
+      activeMode=null;
+      resetRecButtonsUI();
+    };
+    activeRecorder.start();
+    setRecButtonsUI(mode);
+    setStatus(mode==='source'?'recording source':'recording try');
+  }catch(err){setStatus('mic denied');}
+}
+
+function setRecButtonsUI(mode){
+  if(mode==='source'){quickA.classList.add('recording');quickA.textContent='■';}
+  else{quickC.classList.add('recording');quickC.textContent='■';}
+}
+
+function resetRecButtonsUI(){
+  quickA.classList.remove('recording');quickA.textContent='●';
+  quickC.classList.remove('recording');quickC.textContent='●';
+}
+
+function stopRecording(){
+  if(activeRecorder&&activeRecorder.state!=='inactive')activeRecorder.stop();
+}
+
+async function play(key,btn,label){
+  const buffer=buffers[key];
+  if(!buffer)return;
+  await ensureCtx();
+  if(currentSource){try{currentSource.stop();}catch(e){}}
+  if(currentBtn)currentBtn.classList.remove('now-playing');
+  const src=audioCtx.createBufferSource();
+  src.buffer=buffer;
+  src.connect(audioCtx.destination);
+  src.start();
+  currentSource=src;
+  currentBtn=btn;
+  btn.classList.add('now-playing');
+  setStatus('playing '+label);
+  if(key==='B')bPlayed=true;
+  if(key==='D')dPlayed=true;
+  updateNextUp();
+  src.onended=()=>{
+    btn.classList.remove('now-playing');
+    if(currentBtn===btn)currentBtn=null;
+    setStatus('idle');
+  };
+}
+
+function encodeWAV(buffer){
+  const nc=buffer.numberOfChannels,sr=buffer.sampleRate,len=buffer.length;
+  const ba=nc*2,ds=len*ba;
+  const ab=new ArrayBuffer(44+ds);
+  const v=new DataView(ab);
+  const w=(o,s)=>{for(let i=0;i<s.length;i++)v.setUint8(o+i,s.charCodeAt(i));};
+  w(0,'RIFF');v.setUint32(4,36+ds,true);w(8,'WAVE');w(12,'fmt ');
+  v.setUint32(16,16,true);v.setUint16(20,1,true);v.setUint16(22,nc,true);
+  v.setUint32(24,sr,true);v.setUint32(28,sr*ba,true);v.setUint16(32,ba,true);v.setUint16(34,16,true);
+  w(36,'data');v.setUint32(40,ds,true);
+  let off=44;
+  const chs=[];
+  for(let c=0;c<nc;c++)chs.push(buffer.getChannelData(c));
+  for(let i=0;i<len;i++){
+    for(let c=0;c<nc;c++){
+      let s=Math.max(-1,Math.min(1,chs[c][i]));
+      v.setInt16(off,s<0?s*0x8000:s*0x7FFF,true);
+      off+=2;
+    }
+  }
+  return new Blob([ab],{type:'audio/wav'});
+}
+
+async function exportMix(){
+  const list=['A','B','C','D'].map(k=>buffers[k]).filter(b=>b);
+  if(!list.length)return;
+  exportBtn.disabled=true;
+  setStatus('rendering...');
+  try{
+    await ensureCtx();
+    const sr=audioCtx.sampleRate,gap=0.6;
+    let total=0;
+    for(const b of list)total+=b.duration;
+    total+=gap*(list.length-1);
+    const off=new OfflineAudioContext(1,Math.ceil(total*sr),sr);
+    let t=0;
+    for(let i=0;i<list.length;i++){
+      const s=off.createBufferSource();
+      s.buffer=list[i];
+      s.connect(off.destination);
+      s.start(t);
+      t+=list[i].duration+gap;
+    }
+    const rendered=await off.startRendering();
+    const wav=encodeWAV(rendered);
+    const stamp=new Date().toISOString().replace(/[:.]/g,'-').slice(0,19);
+    const filename='backmask-'+stamp+'.wav';
+    const file=new File([wav],filename,{type:'audio/wav'});
+    if(navigator.canShare&&navigator.canShare({files:[file]})){
+      try{await navigator.share({files:[file],title:'BACKMASK'});setStatus('exported');}
+      catch(err){setStatus(err.name==='AbortError'?'cancelled':'share failed');}
+    }else{
+      const url=URL.createObjectURL(wav);
+      const a=document.createElement('a');
+      a.href=url;a.download=filename;
+      document.body.appendChild(a);a.click();document.body.removeChild(a);
+      setTimeout(()=>URL.revokeObjectURL(url),2000);
+      setStatus('downloaded');
+    }
+  }catch(err){setStatus('export failed');}
+  refreshExportBtn();
+}
+
+quickA.addEventListener('click',()=>{if(activeMode==='source')stopRecording();else if(!activeMode)startRecording('source');});
+quickC.addEventListener('click',()=>{if(activeMode==='try')stopRecording();else if(!activeMode)startRecording('try');});
+bA.addEventListener('click',()=>{if(buffers.A)play('A',bA,'original');});
+bB.addEventListener('click',()=>play('B',bB,'reversed'));
+bC.addEventListener('click',()=>play('C',bC,'your try'));
+bD.addEventListener('click',()=>play('D',bD,'try reversed'));
+exportBtn.addEventListener('click',exportMix);
+</script>
+</body>
+</html>
