@@ -12,7 +12,7 @@
     <div class="header">
       <div class="dot"></div>
       <span class="brand">BACKMASK</span>
-      <span class="ver">v.16</span>
+      <span class="ver">v.17</span>
     </div>
     <h1>Sing it <em>backwards.</em></h1>
     <div class="stack">
@@ -101,9 +101,6 @@ function loadSource(buffer){
   buffers.D=null;
   bB.disabled=false;
   bB.classList.add('next-up');
-  bC.disabled=true;
-  bD.disabled=true;
-  quickC.disabled=false;
   refreshExportBtn();
 }
 
@@ -127,8 +124,6 @@ async function startRecording(mode){
         else{
           buffers.C=buf;
           buffers.D=reverseBuffer(buf);
-          bC.disabled=false;
-          bD.disabled=false;
           setStatus('try ready · play D to hear it flipped');
           refreshExportBtn();
         }
@@ -245,10 +240,13 @@ quickA.addEventListener('click',()=>{if(activeMode==='source')stopRecording();el
 quickC.addEventListener('click',()=>{if(activeMode==='try')stopRecording();else if(!activeMode)startRecording('try');});
 bA.addEventListener('click',()=>{if(buffers.A)play('A',bA,'original');});
 bB.addEventListener('click',()=>{
-  play('B',bB,'reversed');
+  bC.disabled=false;
+  bD.disabled=false;
+  quickC.disabled=false;
   bC.classList.add('next-up');
   bD.classList.add('next-up');
   quickC.classList.add('next-up');
+  play('B',bB,'reversed');
 });
 bC.addEventListener('click',()=>play('C',bC,'your try'));
 bD.addEventListener('click',()=>play('D',bD,'try reversed'));
