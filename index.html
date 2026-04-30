@@ -65,97 +65,6 @@
     color: var(--gold);
     font-weight: 500;
   }
-  .stack {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    margin-bottom: 22px;
-  }
-  .row {
-    display: flex;
-    gap: 6px;
-    align-items: stretch;
-  }
-  .row .play {
-    flex: 1;
-    font-family: inherit;
-    background: transparent;
-    color: var(--ink);
-    border: 1px solid var(--line);
-    cursor: pointer;
-    padding: 22px 20px;
-    text-align: left;
-    -webkit-appearance: none;
-    appearance: none;
-    transition: border-color 0.15s ease, background 0.15s ease;
-    display: flex;
-    align-items: center;
-    gap: 18px;
-  }
-  .row .play.now-playing {
-    border-color: var(--gold);
-    background: rgba(212, 165, 116, 0.06);
-  }
-  .row .play:disabled { opacity: 0.2; }
-  .row .play .num {
-    font-family: 'Fraunces', serif;
-    font-weight: 300;
-    font-size: 32px;
-    line-height: 1;
-    color: var(--gold);
-    width: 28px;
-    flex-shrink: 0;
-  }
-  .row .play .label {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-  }
-  .row .play .title {
-    font-size: 14px;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    font-weight: 500;
-  }
-  .row .play .meta {
-    font-size: 9px;
-    color: var(--dim);
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-  }
-  .row .play .arrow {
-    color: var(--dim);
-    font-size: 14px;
-  }
-  .row .play.now-playing .arrow { color: var(--gold); }
-  .row .quickRec {
-    width: 60px;
-    border: 1px solid var(--line);
-    background: transparent;
-    color: var(--accent);
-    cursor: pointer;
-    -webkit-appearance: none;
-    appearance: none;
-    font-size: 18px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    font-family: inherit;
-  }
-  .row .quickRec:disabled { opacity: 0.3; }
-  .row .quickRec.recording {
-    background: var(--accent);
-    color: var(--bg);
-    border-color: var(--accent);
-    animation: blink 1s steps(2) infinite;
-    font-size: 14px;
-  }
-  .quickSpacer {
-    width: 60px;
-    flex-shrink: 0;
-  }
   .phrase {
     border: 1px solid var(--line);
     padding: 18px 16px;
@@ -251,9 +160,67 @@
     border: 1px solid var(--line);
     margin-bottom: 18px;
   }
+  .stack {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .stack button {
+    width: 100%;
+    font-family: inherit;
+    background: transparent;
+    color: var(--ink);
+    border: 1px solid var(--line);
+    cursor: pointer;
+    padding: 22px 20px;
+    text-align: left;
+    -webkit-appearance: none;
+    appearance: none;
+    transition: border-color 0.15s ease, background 0.15s ease;
+    display: flex;
+    align-items: center;
+    gap: 18px;
+  }
+  .stack button.now-playing {
+    border-color: var(--gold);
+    background: rgba(212, 165, 116, 0.06);
+  }
+  .stack button:disabled { opacity: 0.2; }
+  .stack button .num {
+    font-family: 'Fraunces', serif;
+    font-weight: 300;
+    font-size: 32px;
+    line-height: 1;
+    color: var(--gold);
+    width: 28px;
+    flex-shrink: 0;
+  }
+  .stack button .label {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .stack button .title {
+    font-size: 14px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    font-weight: 500;
+  }
+  .stack button .meta {
+    font-size: 9px;
+    color: var(--dim);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+  }
+  .stack button .arrow {
+    color: var(--dim);
+    font-size: 14px;
+  }
+  .stack button.now-playing .arrow { color: var(--gold); }
   .exportBtn {
     width: 100%;
-    margin-top: 4px;
+    margin-top: 14px;
     padding: 16px;
     background: var(--gold);
     color: var(--bg);
@@ -291,57 +258,10 @@
     <div class="header">
       <div class="dot"></div>
       <span class="brand">BACKMASK</span>
-      <span class="ver">v.07</span>
+      <span class="ver">v.05</span>
     </div>
 
     <h1>Sing it<br><em>backwards.</em></h1>
-
-    <div class="stack">
-      <div class="row">
-        <button id="bA" class="play" disabled>
-          <span class="num">A</span>
-          <span class="label">
-            <span class="title">Original</span>
-            <span class="meta">source</span>
-          </span>
-          <span class="arrow">▶</span>
-        </button>
-        <button id="quickA" class="quickRec" title="Record source">●</button>
-      </div>
-      <div class="row">
-        <button id="bB" class="play" disabled>
-          <span class="num">B</span>
-          <span class="label">
-            <span class="title">Reversed</span>
-            <span class="meta">source flipped</span>
-          </span>
-          <span class="arrow">▶</span>
-        </button>
-        <span class="quickSpacer"></span>
-      </div>
-      <div class="row">
-        <button id="bC" class="play" disabled>
-          <span class="num">C</span>
-          <span class="label">
-            <span class="title">Your Try</span>
-            <span class="meta">raw mimic</span>
-          </span>
-          <span class="arrow">▶</span>
-        </button>
-        <button id="quickC" class="quickRec" disabled title="Record your try">●</button>
-      </div>
-      <div class="row">
-        <button id="bD" class="play" disabled>
-          <span class="num">D</span>
-          <span class="label">
-            <span class="title">Try Reversed</span>
-            <span class="meta">mimic flipped</span>
-          </span>
-          <span class="arrow">▶</span>
-        </button>
-        <span class="quickSpacer"></span>
-      </div>
-    </div>
 
     <button id="phraseBtn" class="phrase">
       <div class="pLabel">↻ phrase</div>
@@ -359,6 +279,41 @@
 
     <canvas id="wave"></canvas>
 
+    <div class="stack">
+      <button id="bA" disabled>
+        <span class="num">A</span>
+        <span class="label">
+          <span class="title">Original</span>
+          <span class="meta">source</span>
+        </span>
+        <span class="arrow">▶</span>
+      </button>
+      <button id="bB" disabled>
+        <span class="num">B</span>
+        <span class="label">
+          <span class="title">Reversed</span>
+          <span class="meta">source flipped</span>
+        </span>
+        <span class="arrow">▶</span>
+      </button>
+      <button id="bC" disabled>
+        <span class="num">C</span>
+        <span class="label">
+          <span class="title">Your Try</span>
+          <span class="meta">raw mimic</span>
+        </span>
+        <span class="arrow">▶</span>
+      </button>
+      <button id="bD" disabled>
+        <span class="num">D</span>
+        <span class="label">
+          <span class="title">Try Reversed</span>
+          <span class="meta">mimic flipped</span>
+        </span>
+        <span class="arrow">▶</span>
+      </button>
+    </div>
+
     <button id="exportBtn" class="exportBtn" disabled>↓ export full mix</button>
 
     <div class="status">
@@ -371,6 +326,7 @@
 const ADJ = ['sleepy','tiny','golden','dusty','sneaky','electric','ancient','salty','wild','frozen','lonely','broken','secret','restless','dizzy','crooked','silver','hollow','tangled','bitter','gentle','rusty','hidden','foolish','clever','lucky','glowing','quiet','bored','furious','enormous','invisible'];
 const NOUN = ['cat','wizard','robot','ghost','dragon','pirate','moon','river','mountain','tower','garden','kitchen','bicycle','rocket','mirror','shadow','whisper','dream','jacket','ocean','forest','candle','train','balloon','telephone','painting','monster','pickle','bagel','cloud','magnet','pillow','mailman','grandma','penguin','submarine','volcano','lighthouse','sandwich','umbrella'];
 const VERB = ['kissed','chased','sang to','waved at','painted','juggled','swallowed','hugged','photographed','hypnotized','ignored','followed','stole','untangled','balanced','broke','married','tickled','interviewed','arrested','befriended','outran','impressed','fed','tackled','rescued','annoyed','copied','outsmarted','warned'];
+
 const TEMPLATES = [
   'The {adj} {noun} {verb} my {noun}.',
   'A {adj} {noun} {verb} the {adj} {noun}.',
@@ -379,11 +335,16 @@ const TEMPLATES = [
   'My {noun} {verb} the {adj} {noun} last night.',
   'Every {adj} {noun} secretly {verb} the {noun}.'
 ];
+
 function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
 function generatePhrase() {
-  return pick(TEMPLATES).replace(/\{(adj|noun|verb)\}/g, (_, k) =>
-    k === 'adj' ? pick(ADJ) : k === 'noun' ? pick(NOUN) : pick(VERB)
-  );
+  const t = pick(TEMPLATES);
+  return t.replace(/\{(adj|noun|verb)\}/g, (_, kind) => {
+    if (kind === 'adj') return pick(ADJ);
+    if (kind === 'noun') return pick(NOUN);
+    return pick(VERB);
+  });
 }
 
 const phraseBtn = document.getElementById('phraseBtn');
@@ -395,8 +356,6 @@ phraseBtn.addEventListener('click', () => {
 const fileInput = document.getElementById('file');
 const recSrcBtn = document.getElementById('recSrcBtn');
 const recBtn = document.getElementById('recBtn');
-const quickA = document.getElementById('quickA');
-const quickC = document.getElementById('quickC');
 const exportBtn = document.getElementById('exportBtn');
 const bA = document.getElementById('bA');
 const bB = document.getElementById('bB');
@@ -414,7 +373,8 @@ let activeRecorder = null, activeChunks = [], activeMode = null;
 function setStatus(s) { statusEl.textContent = s; }
 
 function refreshExportBtn() {
-  exportBtn.disabled = !['A','B','C','D'].some(k => buffers[k]);
+  const any = ['A','B','C','D'].some(k => buffers[k]);
+  exportBtn.disabled = !any;
 }
 
 function resizeCanvas() {
@@ -461,7 +421,7 @@ function reverseBuffer(buffer) {
 
 async function ensureCtx() {
   if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  if (audioCtx.state === 'suspended') await audio Ctx.resume();
+  if (audioCtx.state === 'suspended') await audioCtx.resume();
 }
 
 async function decodeBlob(blob) {
@@ -480,7 +440,6 @@ function loadSource(buffer) {
   bC.disabled = true;
   bD.disabled = true;
   recBtn.disabled = false;
-  quickC.disabled = false;
   drawWave(buffer);
   refreshExportBtn();
 }
@@ -530,35 +489,28 @@ async function startRecording(mode) {
       }
       activeRecorder = null;
       activeMode = null;
-      resetRecButtonsUI();
     };
     activeRecorder.start();
-    setRecButtonsUI(mode);
-    setStatus(mode === 'source' ? 'recording source' : 'recording try');
+    if (mode === 'source') {
+      recSrcBtn.classList.add('recording');
+      recSrcBtn.textContent = '■ stop';
+      setStatus('recording source');
+    } else {
+      recBtn.classList.add('recording');
+      recBtn.textContent = '■ stop';
+      setStatus('recording try');
+    }
   } catch (err) {
     setStatus('mic denied');
   }
 }
 
-function setRecButtonsUI(mode) {
-  if (mode === 'source') {
-    recSrcBtn.classList.add('recording'); recSrcBtn.textContent = '■ stop';
-    quickA.classList.add('recording'); quickA.textContent = '■';
-  } else {
-    recBtn.classList.add('recording'); recBtn.textContent = '■ stop';
-    quickC.classList.add('recording'); quickC.textContent = '■';
-  }
-}
-
-function resetRecButtonsUI() {
-  recSrcBtn.classList.remove('recording'); recSrcBtn.textContent = '● rec source';
-  recBtn.classList.remove('recording'); recBtn.textContent = '● record your try';
-  quickA.classList.remove('recording'); quickA.textContent = '●';
-  quickC.classList.remove('recording'); quickC.textContent = '●';
-}
-
 function stopRecording() {
   if (activeRecorder && activeRecorder.state !== 'inactive') activeRecorder.stop();
+  recSrcBtn.classList.remove('recording');
+  recSrcBtn.textContent = '● rec source';
+  recBtn.classList.remove('recording');
+  recBtn.textContent = '● record your try';
 }
 
 async function play(key, btn, label) {
@@ -678,14 +630,6 @@ recBtn.addEventListener('click', () => {
   if (activeMode === 'try') stopRecording();
   else if (!activeMode) startRecording('try');
 });
-quickA.addEventListener('click', () => {
-  if (activeMode === 'source') stopRecording();
-  else if (!activeMode) startRecording('source');
-});
-quickC.addEventListener('click', () => {
-  if (activeMode === 'try') stopRecording();
-  else if (!activeMode) startRecording('try');
-});
 bA.addEventListener('click', () => play('A', bA, 'original'));
 bB.addEventListener('click', () => play('B', bB, 'reversed'));
 bC.addEventListener('click', () => play('C', bC, 'your try'));
@@ -694,5 +638,3 @@ exportBtn.addEventListener('click', exportMix);
 </script>
 </body>
 </html>
-​​​​​​​​​​​​​​​​
-  
