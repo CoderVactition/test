@@ -12,7 +12,7 @@
     <div class="header">
       <div class="dot"></div>
       <span class="brand">BACKMASK</span>
-      <span class="ver">v.13</span>
+      <span class="ver">v.14</span>
     </div>
     <h1>Sing it <em>backwards.</em></h1>
     <div class="stack">
@@ -69,7 +69,6 @@ let audioCtx;
 const buffers={A:null,B:null,C:null,D:null};
 let currentSource,currentBtn;
 let activeRecorder=null,activeChunks=[],activeMode=null;
-let bPlayed=false,dPlayed=false;
 
 function setStatus(s){statusEl.textContent=s;}
 function refreshExportBtn(){exportBtn.disabled=!['A','B','C','D'].some(k=>buffers[k]);}
@@ -77,10 +76,14 @@ function refreshExportBtn(){exportBtn.disabled=!['A','B','C','D'].some(k=>buffer
 function clearNextUp(){[quickA,bA,bB,quickC,bC,bD].forEach(el=>el&&el.classList&&el.classList.remove('next-up'));}
 function updateNextUp(){
   clearNextUp();
-  if(!buffers.A){quickA.classList.add('next-up');bA.classList.add('next-up');return;}
-  if(!bPlayed){bB.classList.add('next-up');return;}
-  if(!buffers.C){quickC.classList.add('next-up');return;}
-  if(!dPlayed){bD.classList.add('next-up');return;}
+  if(!buffers.A){
+    quickA.classList.add('next-up');
+    bA.classList.add('next-up');
+    return;
+  }
+  bB.classList.add('next-up');
+  quickC.classList.add('next-up');
+  if(buffers.C){bD.classList.add('next-up');}
 }
 updateNextUp();
 
@@ -110,8 +113,6 @@ function loadSource(buffer){
   buffers.B=reverseBuffer(buffer);
   buffers.C=null;
   buffers.D=null;
-  bPlayed=false;
-  dPlayed=false;
   bB.disabled=false;
   bC.disabled=true;
   bD.disabled=true;
@@ -185,9 +186,6 @@ async function play(key,btn,label){
   currentBtn=btn;
   btn.classList.add('now-playing');
   setStatus('playing '+label);
-  if(key==='B')bPlayed=true;
-  if(key==='D')dPlayed=true;
-  updateNextUp();
   src.onended=()=>{
     btn.classList.remove('now-playing');
     if(currentBtn===btn)currentBtn=null;
