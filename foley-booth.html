@@ -354,6 +354,7 @@ $('videoInput').addEventListener('change', e => {
   const f = e.target.files[0];
   if (!f) return;
   clearSoundsAndSpots();                    // new video → clear spots + sounds
+  warmedUp = false;                         // prime the new video on its first play
   video.src = URL.createObjectURL(f);
   showVideoUI();
   video.addEventListener('loadedmetadata', function onMeta(){
@@ -364,15 +365,45 @@ $('videoInput').addEventListener('change', e => {
 $('muteVideo').addEventListener('change', e => video.muted = e.target.checked);
 
 /* ---------------- transport ---------------- */
-$('playBtn').addEventListener('click', () => {
-  if (video.paused) video.play(); else video.pause();
+let warmedUp = false, warming = false;
+
+// The very first play of a freshly-loaded video stutters while the decoder
+// spins up. Prime it once: play → pause → seek to 0 → play for real, all
+// hidden from the UI so it doesn't flip the button or fire spots.
+async function warmUpVideo(){
+  warming = true;
+  const prevMuted = video.muted;
+  try{
+    video.muted = true;
+    await video.play();
+    await new Promise(r => setTimeout(r, 120));   // let a frame decode
+    video.pause();
+    video.currentTime = 0;
+    await Promise.race([
+      new Promise(res => video.addEventListener('seeked', res, {once:true})),
+      new Promise(res => setTimeout(res, 300))
+    ]);
+  }catch(e){ /* best effort */ }
+  video.muted = prevMuted;
+  warming = false;
+}
+
+$('playBtn').addEventListener('click', async () => {
+  if (!video.paused){ video.pause(); return; }
+  if (!warmedUp){
+    warmedUp = true;
+    await warmUpVideo();
+  }
+  video.play();
 });
 video.addEventListener('play', () => {
+  if (warming) return;                            // ignore the warm-up play
   $('playBtn').textContent = '❚❚ Pause';
   lastTime = video.currentTime;
   loop();
 });
 video.addEventListener('pause', () => {
+  if (warming) return;                            // ignore the warm-up pause
   $('playBtn').textContent = '▶ Play';
   cancelAnimationFrame(rafId);
   drawFuse();
