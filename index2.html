@@ -263,6 +263,47 @@ function saveMarkers(){
   lsSet(storageKey, JSON.stringify(markers.map(m => m.t)));
 }
 
+/* ---------------- sound library (persists in IndexedDB) ---------------- */
+let db = null;
+function openDB(){
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open('foleyBooth', 1);
+    req.onupgradeneeded = () => {
+      const d = req.result;
+      if (!d.objectStoreNames.contains('clips')) d.createObjectStore('clips', {keyPath:'id'});
+    };
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+function idbSaveClip(rec){
+  if (!db) return Promise.resolve();
+  return new Promise((res, rej) => {
+    const tx = db.transaction('clips','readwrite');
+    tx.objectStore('clips').put(rec);
+    tx.oncomplete = () => res();
+    tx.onerror = () => rej(tx.error);
+  });
+}
+function idbDeleteClip(id){
+  if (!db) return Promise.resolve();
+  return new Promise((res, rej) => {
+    const tx = db.transaction('clips','readwrite');
+    tx.objectStore('clips').delete(id);
+    tx.oncomplete = () => res();
+    tx.onerror = () => rej(tx.error);
+  });
+}
+function idbAllClips(){
+  if (!db) return Promise.resolve([]);
+  return new Promise((res, rej) => {
+    const req = db.transaction('clips','readonly').objectStore('clips').getAll();
+    req.onsuccess = () => res(req.result || []);
+    req.onerror = () => rej(req.error);
+  });
+}
+function persistArmed(){ lsSet('foleybooth:armed', armedClipId || ''); }
+
 /* ---------------- video load ---------------- */
 $('videoInput').addEventListener('change', e => {
   const f = e.target.files[0];
@@ -377,13 +418,13 @@ $('recBtn').addEventListener('click', async () => {
       btn.textContent = 'Trimming…';
       btn.classList.remove('recording');
       const blob = new Blob(chunks, {type: recorder.mimeType || 'audio/webm'});
-      let url;
+      let finalBlob;
       try{
-        url = await trimClip(blob, 0.5, 0.5);   // shave 0.5s off head and tail
+        finalBlob = await trimClip(blob, 0.5, 0.5);   // shave 0.5s off head and tail
       }catch(e){
-        url = URL.createObjectURL(blob);        // fall back to the raw take
+        finalBlob = blob;                             // fall back to the raw take
       }
-      addClip(url, 'Take ' + (++clipCount));
+      addClip(finalBlob, 'Take ' + (++clipCount));
       btn.textContent = '● Record a sound';
     };
 
@@ -425,7 +466,7 @@ async function trimClip(blob, head, tail){
   for (let ch = 0; ch < buf.numberOfChannels; ch++){
     out.getChannelData(ch).set(buf.getChannelData(ch).subarray(start, end));
   }
-  return URL.createObjectURL(audioBufferToWav(out));
+  return audioBufferToWav(out);
 }
 
 function audioBufferToWav(buf){
@@ -457,14 +498,17 @@ function audioBufferToWav(buf){
 $('audioInput').addEventListener('change', e => {
   const f = e.target.files[0];
   if (!f) return;
-  addClip(URL.createObjectURL(f), f.name.replace(/\.[^.]+$/,''));
+  addClip(f, f.name.replace(/\.[^.]+$/,''));
   e.target.value = '';
 });
 
-function addClip(url, name){
+function addClip(blob, name){
   const id = 'c' + Date.now() + Math.random().toString(36).slice(2,6);
+  const url = URL.createObjectURL(blob);
   clips.push({id, url, name});
   armedClipId = id;              // newest take is armed automatically
+  idbSaveClip({id, name, blob, order: Date.now()}).catch(()=>{});
+  persistArmed();
   renderClips();
   renderMarkers();
 }
@@ -481,7 +525,7 @@ function renderClips(){
     const name = document.createElement('div');
     name.className = 'name';
     name.textContent = (c.id === armedClipId ? '🎯 ' : '') + c.name;
-    name.onclick = () => { armedClipId = c.id; renderClips(); renderMarkers(); };
+    name.onclick = () => { armedClipId = c.id; persistArmed(); renderClips(); renderMarkers(); };
 
     const play = document.createElement('button');
     play.className = 'mini';
@@ -494,8 +538,10 @@ function renderClips(){
     del.textContent = '✕';
     del.setAttribute('aria-label','Delete ' + c.name);
     del.onclick = () => {
+      URL.revokeObjectURL(c.url);
+      idbDeleteClip(c.id).catch(()=>{});
       clips = clips.filter(x => x.id !== c.id);
-      if (armedClipId === c.id) armedClipId = clips.length ? clips[clips.length-1].id : null;
+      if (armedClipId === c.id){ armedClipId = clips.length ? clips[clips.length-1].id : null; persistArmed(); }
       renderClips(); renderMarkers();
     };
 
@@ -680,6 +726,24 @@ function resetExportUI(){
   $('cancelExportBtn').style.display = 'none';
   $('addMarkerBtn').disabled = false;
 }
+
+/* ---------------- restore saved sounds on load ---------------- */
+(async () => {
+  try{
+    db = await openDB();
+    const saved = (await idbAllClips()).sort((a,b) => (a.order||0) - (b.order||0));
+    for (const rec of saved){
+      clips.push({ id: rec.id, name: rec.name, url: URL.createObjectURL(rec.blob) });
+    }
+    if (clips.length){
+      const savedArmed = lsGet('foleybooth:armed');
+      armedClipId = clips.some(c => c.id === savedArmed) ? savedArmed : clips[clips.length-1].id;
+      clipCount = clips.length;
+      renderClips();
+      renderMarkers();
+    }
+  }catch(e){ /* IndexedDB unavailable — sounds just won't persist */ }
+})();
 </script>
 </body>
 </html>
