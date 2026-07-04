@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -97,6 +96,7 @@
     content:"";position:absolute;top:26px;left:11px;width:2px;height:10px;background:var(--spark);
   }
   .marker.fired{animation:burst .5s ease-out}
+  .marker.noSound{opacity:.4}
   @keyframes burst{
     0%{transform:scale(1);box-shadow:0 0 0 0 rgba(255,84,112,.8)}
     50%{transform:scale(1.45);border-color:var(--pop)}
@@ -119,6 +119,7 @@
   button.danger-text{color:var(--pop)}
   button:disabled{opacity:.4;cursor:default}
   button.recording{background:var(--pop);color:#fff;animation:pulse 1s infinite}
+  button.counting{background:var(--spark);color:#241500}
   @keyframes pulse{50%{opacity:.75}}
   .grow{flex:1}
 
@@ -152,7 +153,7 @@
 <body>
 <header>
   <h1>FOLEY<br>BOOTH</h1>
-  <p>Load a video, record a sound with your mouth, drop it on the fuse. Press play and hear it fire.</p>
+  <p>Load a video, drop spots on the fuse, then record the one sound that fires at every spot. Spots are remembered next time you load the same video.</p>
 </header>
 
 <!-- ============ VIDEO + FUSE ============ -->
@@ -176,7 +177,7 @@
 
   <div class="row" id="transport" style="display:none">
     <button id="playBtn" class="primary grow">▶ Play</button>
-    <button id="addMarkerBtn" class="grow">＋ Drop sound here</button>
+    <button id="addMarkerBtn" class="grow">＋ Drop a spot here</button>
   </div>
   <label class="toggle" id="muteRow" style="display:none">
     <input type="checkbox" id="muteVideo" checked> Mute the video's own audio
@@ -195,13 +196,14 @@
   </div>
   <div id="micError">Microphone blocked. Allow mic access in your browser settings, then try again.</div>
   <div id="clipList"><div class="empty">No sounds yet. Record your best firework.</div></div>
-  <p class="hint">Tap a sound to arm it — new markers use the armed sound.</p>
+  <p class="hint">Tap a sound to make it the one that plays — every spot uses whichever sound is picked right now.</p>
 </section>
 
 <!-- ============ MARKERS ============ -->
 <section class="card">
-  <h2>3 · Cue sheet</h2>
-  <div id="markerList"><div class="empty">No cues yet. Scrub the video to the moment, then "Drop sound here".</div></div>
+  <h2>3 · Spots</h2>
+  <p class="hint" style="margin-top:0">Spots save automatically for this exact video file, on this browser.</p>
+  <div id="markerList"><div class="empty">No spots yet. Scrub the video to the moment, then "Drop a spot here".</div></div>
 </section>
 
 <!-- ============ EXPORT ============ -->
@@ -220,11 +222,12 @@ const $ = id => document.getElementById(id);
 const video = $('video');
 
 let clips = [];        // {id, name, url}
-let markers = [];      // {id, t, clipId}
+let markers = [];      // {id, t}
 let armedClipId = null;
 let clipCount = 0, markerCount = 0;
 let lastTime = 0;
 let rafId = null;
+let storageKey = null;
 
 /* export state */
 let exporting = false;
@@ -235,6 +238,30 @@ const exCanvas = document.createElement('canvas');
 exCanvas.style.cssText = 'position:fixed;left:-9999px;top:0';
 document.body.appendChild(exCanvas);
 const exCtx2d = exCanvas.getContext('2d');
+
+/* ---------------- spot memory (per video file) ---------------- */
+function computeStorageKey(file, duration){
+  return 'foleybooth:' + file.name + '|' + file.size + '|' + Math.round(duration || 0);
+}
+function lsGet(key){ try{ return localStorage.getItem(key); }catch(e){ return null; } }
+function lsSet(key, val){ try{ localStorage.setItem(key, val); }catch(e){ /* storage unavailable in this browser context */ } }
+
+function loadMarkersForVideo(){
+  markers = [];
+  markerCount = 0;
+  const raw = storageKey ? lsGet(storageKey) : null;
+  if (raw){
+    try{
+      const times = JSON.parse(raw);
+      markers = times.map(t => ({ id:'m' + (++markerCount) + '_' + Date.now().toString(36), t }));
+    }catch(e){ markers = []; }
+  }
+  renderMarkers();
+}
+function saveMarkers(){
+  if (!storageKey) return;
+  lsSet(storageKey, JSON.stringify(markers.map(m => m.t)));
+}
 
 /* ---------------- video load ---------------- */
 $('videoInput').addEventListener('change', e => {
@@ -249,6 +276,10 @@ $('videoInput').addEventListener('change', e => {
   $('muteRow').style.display = 'flex';
   $('exportBtn').disabled = false;
   video.muted = $('muteVideo').checked;
+  video.addEventListener('loadedmetadata', function onMeta(){
+    storageKey = computeStorageKey(f, video.duration);
+    loadMarkersForVideo();
+  }, {once:true});
 });
 $('muteVideo').addEventListener('change', e => video.muted = e.target.checked);
 
@@ -281,12 +312,12 @@ function loop(){
 }
 
 function fire(m){
-  const clip = clips.find(c => c.id === m.clipId);
+  const clip = clips.find(c => c.id === armedClipId);
   if (clip){
     if (exporting && clipBuffers[clip.id]){
       const src = audioCtx.createBufferSource();
       src.buffer = clipBuffers[clip.id];
-      src.connect(mixDest);              // into the recording
+      src.connect(mixDest);          // into the recording
       src.connect(audioCtx.destination); // and to your ears
       src.start();
     } else {
@@ -328,8 +359,10 @@ function scrub(e){
 
 /* ---------------- recording ---------------- */
 let recorder = null, chunks = [];
+let countdownActive = false, countdownTimers = [];
 $('recBtn').addEventListener('click', async () => {
   if (recorder && recorder.state === 'recording'){ recorder.stop(); return; }
+  if (countdownActive) return;   // ignore taps during the countdown
   try{
     const stream = await navigator.mediaDevices.getUserMedia({audio:true});
     $('micError').style.display = 'none';
@@ -338,20 +371,88 @@ $('recBtn').addEventListener('click', async () => {
     recorder = new MediaRecorder(stream, mime ? {mimeType:mime} : undefined);
     chunks = [];
     recorder.ondataavailable = e => chunks.push(e.data);
-    recorder.onstop = () => {
+    recorder.onstop = async () => {
       stream.getTracks().forEach(tr => tr.stop());
+      const btn = $('recBtn');
+      btn.textContent = 'Trimming…';
+      btn.classList.remove('recording');
       const blob = new Blob(chunks, {type: recorder.mimeType || 'audio/webm'});
-      addClip(URL.createObjectURL(blob), 'Take ' + (++clipCount));
-      $('recBtn').textContent = '● Record a sound';
-      $('recBtn').classList.remove('recording');
+      let url;
+      try{
+        url = await trimClip(blob, 0.5, 0.5);   // shave 0.5s off head and tail
+      }catch(e){
+        url = URL.createObjectURL(blob);        // fall back to the raw take
+      }
+      addClip(url, 'Take ' + (++clipCount));
+      btn.textContent = '● Record a sound';
     };
-    recorder.start();
-    $('recBtn').textContent = '■ Stop recording';
-    $('recBtn').classList.add('recording');
+
+    // 2-second countdown before recording actually starts.
+    // Button stays in a neutral "get ready" state — it only goes red the
+    // moment recording truly begins, so the countdown is never captured.
+    countdownActive = true;
+    countdownTimers = [];
+    const btn = $('recBtn');
+    btn.classList.remove('recording');
+    btn.classList.add('counting');
+    btn.textContent = 'Get ready… 2';
+    countdownTimers.push(setTimeout(() => { btn.textContent = 'Get ready… 1'; }, 1000));
+    countdownTimers.push(setTimeout(() => {
+      countdownActive = false;
+      btn.classList.remove('counting');
+      btn.classList.add('recording');
+      btn.textContent = '■ Stop recording — GO!';
+      recorder.start();
+    }, 2000));
   }catch(err){
     $('micError').style.display = 'block';
   }
 });
+
+/* Trim `head` seconds off the start and `tail` seconds off the end of a
+   recorded audio blob, then re-encode as WAV. Returns a blob URL. */
+async function trimClip(blob, head, tail){
+  audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+  if (audioCtx.state === 'suspended') await audioCtx.resume();
+  const buf = await audioCtx.decodeAudioData(await blob.arrayBuffer());
+  const rate = buf.sampleRate;
+  let start = Math.floor(head * rate);
+  let end   = buf.length - Math.floor(tail * rate);
+  // if the take is too short to trim both ends, keep it whole
+  if (end - start < rate * 0.05){ start = 0; end = buf.length; }
+  const len = end - start;
+  const out = audioCtx.createBuffer(buf.numberOfChannels, len, rate);
+  for (let ch = 0; ch < buf.numberOfChannels; ch++){
+    out.getChannelData(ch).set(buf.getChannelData(ch).subarray(start, end));
+  }
+  return URL.createObjectURL(audioBufferToWav(out));
+}
+
+function audioBufferToWav(buf){
+  const numCh = buf.numberOfChannels, rate = buf.sampleRate, len = buf.length;
+  const bytesPerSample = 2, blockAlign = numCh * bytesPerSample;
+  const dataSize = len * blockAlign;
+  const ab = new ArrayBuffer(44 + dataSize);
+  const view = new DataView(ab);
+  const wr = (off, s) => { for (let i=0;i<s.length;i++) view.setUint8(off+i, s.charCodeAt(i)); };
+  wr(0,'RIFF'); view.setUint32(4, 36+dataSize, true); wr(8,'WAVE');
+  wr(12,'fmt '); view.setUint32(16,16,true); view.setUint16(20,1,true);
+  view.setUint16(22,numCh,true); view.setUint32(24,rate,true);
+  view.setUint32(28,rate*blockAlign,true); view.setUint16(32,blockAlign,true);
+  view.setUint16(34,16,true);
+  wr(36,'data'); view.setUint32(40,dataSize,true);
+  let off = 44;
+  const chans = [];
+  for (let ch=0; ch<numCh; ch++) chans.push(buf.getChannelData(ch));
+  for (let i=0;i<len;i++){
+    for (let ch=0; ch<numCh; ch++){
+      let s = Math.max(-1, Math.min(1, chans[ch][i]));
+      view.setInt16(off, s < 0 ? s*0x8000 : s*0x7FFF, true);
+      off += 2;
+    }
+  }
+  return new Blob([ab], {type:'audio/wav'});
+}
 
 $('audioInput').addEventListener('change', e => {
   const f = e.target.files[0];
@@ -380,7 +481,7 @@ function renderClips(){
     const name = document.createElement('div');
     name.className = 'name';
     name.textContent = (c.id === armedClipId ? '🎯 ' : '') + c.name;
-    name.onclick = () => { armedClipId = c.id; renderClips(); };
+    name.onclick = () => { armedClipId = c.id; renderClips(); renderMarkers(); };
 
     const play = document.createElement('button');
     play.className = 'mini';
@@ -394,7 +495,6 @@ function renderClips(){
     del.setAttribute('aria-label','Delete ' + c.name);
     del.onclick = () => {
       clips = clips.filter(x => x.id !== c.id);
-      markers = markers.filter(m => m.clipId !== c.id);
       if (armedClipId === c.id) armedClipId = clips.length ? clips[clips.length-1].id : null;
       renderClips(); renderMarkers();
     };
@@ -406,11 +506,11 @@ function renderClips(){
 
 /* ---------------- markers ---------------- */
 $('addMarkerBtn').addEventListener('click', () => {
-  if (!video.duration){ return; }
-  if (!armedClipId){ $('recBtn').scrollIntoView({behavior:'smooth'}); $('recBtn').focus(); return; }
-  markers.push({ id:'m' + (++markerCount), t: video.currentTime, clipId: armedClipId });
+  if (!video.duration) return;
+  markers.push({ id:'m' + (++markerCount) + '_' + Date.now().toString(36), t: video.currentTime });
   markers.sort((a,b) => a.t - b.t);
   renderMarkers();
+  saveMarkers();
 });
 
 function renderMarkers(){
@@ -418,16 +518,16 @@ function renderMarkers(){
   fuse.querySelectorAll('.marker').forEach(el => el.remove());
   for (const m of markers){
     const pin = document.createElement('div');
-    pin.className = 'marker';
+    pin.className = 'marker' + (armedClipId ? '' : ' noSound');
     pin.dataset.id = m.id;
     pin.style.left = pct(m.t) + '%';
     pin.textContent = '✦';
     pin.onclick = () => { video.currentTime = m.t; drawFuse(); };
     fuse.appendChild(pin);
   }
-  // cue sheet
+  // spot list
   const box = $('markerList');
-  if (!markers.length){ box.innerHTML = '<div class="empty">No cues yet. Scrub the video to the moment, then "Drop sound here".</div>'; return; }
+  if (!markers.length){ box.innerHTML = '<div class="empty">No spots yet. Scrub the video to the moment, then "Drop a spot here".</div>'; return; }
   box.innerHTML = '';
   for (const m of markers){
     const row = document.createElement('div');
@@ -438,31 +538,23 @@ function renderMarkers(){
     time.style.cursor = 'pointer';
     time.onclick = () => { video.currentTime = m.t; drawFuse(); };
 
-    const sel = document.createElement('select');
-    for (const c of clips){
-      const o = document.createElement('option');
-      o.value = c.id; o.textContent = c.name;
-      if (c.id === m.clipId) o.selected = true;
-      sel.appendChild(o);
-    }
-    sel.onchange = () => m.clipId = sel.value;
-
     const minus = mkNudge('−', () => nudge(m, -0.1));
     const plus  = mkNudge('＋', () => nudge(m, +0.1));
 
     const test = document.createElement('button');
     test.className = 'mini';
     test.textContent = '▶';
-    test.setAttribute('aria-label','Test cue');
+    test.disabled = !armedClipId;
+    test.setAttribute('aria-label','Test spot');
     test.onclick = () => fire(m);
 
     const del = document.createElement('button');
     del.className = 'mini danger-text';
     del.textContent = '✕';
-    del.setAttribute('aria-label','Delete cue');
-    del.onclick = () => { markers = markers.filter(x => x.id !== m.id); renderMarkers(); };
+    del.setAttribute('aria-label','Delete spot');
+    del.onclick = () => { markers = markers.filter(x => x.id !== m.id); renderMarkers(); saveMarkers(); };
 
-    row.append(time, sel, minus, plus, test, del);
+    row.append(time, minus, plus, test, del);
     box.appendChild(row);
   }
 }
@@ -478,6 +570,7 @@ function nudge(m, d){
   m.t = Math.min(Math.max(m.t + d, 0), video.duration || m.t);
   markers.sort((a,b) => a.t - b.t);
   renderMarkers();
+  saveMarkers();
 }
 
 /* ---------------- export ---------------- */
@@ -492,12 +585,10 @@ function pickMime(){
 }
 
 async function decodeClips(){
-  for (const m of markers){
-    const clip = clips.find(c => c.id === m.clipId);
-    if (!clip || clipBuffers[clip.id]) continue;
-    const ab = await (await fetch(clip.url)).arrayBuffer();
-    clipBuffers[clip.id] = await audioCtx.decodeAudioData(ab);
-  }
+  const clip = clips.find(c => c.id === armedClipId);
+  if (!clip || clipBuffers[clip.id]) return;
+  const ab = await (await fetch(clip.url)).arrayBuffer();
+  clipBuffers[clip.id] = await audioCtx.decodeAudioData(ab);
 }
 
 $('exportBtn').addEventListener('click', async () => {
