@@ -364,8 +364,15 @@ $('videoInput').addEventListener('change', e => {
 $('muteVideo').addEventListener('change', e => video.muted = e.target.checked);
 
 /* ---------------- transport ---------------- */
-$('playBtn').addEventListener('click', () => {
-  if (video.paused) video.play(); else video.pause();
+$('playBtn').addEventListener('click', async () => {
+  if (video.paused){
+    await ensureAudioCtx();                         // unlock audio inside the tap
+    const clip = clips.find(c => c.id === armedClipId);
+    if (clip) ensureClipBuffer(clip).catch(()=>{}); // decode so spots fire cleanly
+    video.play();
+  } else {
+    video.pause();
+  }
 });
 video.addEventListener('play', () => {
   $('playBtn').textContent = '❚❚ Pause';
@@ -391,6 +398,29 @@ function loop(){
   if (!video.paused && !video.ended) rafId = requestAnimationFrame(loop);
 }
 
+async function ensureAudioCtx(){
+  audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+  if (audioCtx.state === 'suspended') await audioCtx.resume();
+  return audioCtx;
+}
+// Decode a clip to an AudioBuffer once and cache it, so it can be played
+// through the Web Audio API (which — unlike new Audio() — ignores the
+// iPhone silent switch).
+async function ensureClipBuffer(clip){
+  if (!clip) return null;
+  if (clipBuffers[clip.id]) return clipBuffers[clip.id];
+  await ensureAudioCtx();
+  const ab = await (await fetch(clip.url)).arrayBuffer();
+  clipBuffers[clip.id] = await audioCtx.decodeAudioData(ab);
+  return clipBuffers[clip.id];
+}
+function playBufferLive(buf){
+  const src = audioCtx.createBufferSource();
+  src.buffer = buf;
+  src.connect(audioCtx.destination);
+  src.start();
+}
+
 function fire(m){
   const clip = clips.find(c => c.id === armedClipId);
   if (clip){
@@ -400,8 +430,11 @@ function fire(m){
       src.connect(mixDest);          // into the recording
       src.connect(audioCtx.destination); // and to your ears
       src.start();
+    } else if (clipBuffers[clip.id] && audioCtx){
+      playBufferLive(clipBuffers[clip.id]);   // Web Audio → plays even if muted
     } else {
-      new Audio(clip.url).play().catch(()=>{});
+      new Audio(clip.url).play().catch(()=>{}); // not decoded yet: fall back…
+      ensureClipBuffer(clip).catch(()=>{});     // …and decode for next time
     }
   }
   const el = document.querySelector('.marker[data-id="'+m.id+'"]');
@@ -570,7 +603,12 @@ function renderClips(){
     play.className = 'mini';
     play.textContent = '▶';
     play.setAttribute('aria-label','Preview ' + c.name);
-    play.onclick = () => new Audio(c.url).play();
+    play.onclick = async () => {
+      try{
+        const buf = await ensureClipBuffer(c);       // Web Audio → ignores mute switch
+        playBufferLive(buf);
+      }catch(e){ new Audio(c.url).play().catch(()=>{}); }
+    };
 
     const del = document.createElement('button');
     del.className = 'mini danger-text';
@@ -633,7 +671,12 @@ function renderMarkers(){
     test.textContent = '▶';
     test.disabled = !armedClipId;
     test.setAttribute('aria-label','Test spot');
-    test.onclick = () => fire(m);
+    test.onclick = async () => {
+      const clip = clips.find(c => c.id === armedClipId);
+      await ensureAudioCtx();
+      if (clip) await ensureClipBuffer(clip).catch(()=>{});
+      fire(m);
+    };
 
     const del = document.createElement('button');
     del.className = 'mini danger-text';
