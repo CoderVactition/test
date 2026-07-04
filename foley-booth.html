@@ -91,7 +91,9 @@
     border-radius:50%;background:var(--panel-2);border:2px solid var(--spark);
     display:flex;align-items:center;justify-content:center;
     font-size:.85rem;line-height:1;
+    cursor:grab;touch-action:none;
   }
+  .marker.dragging{cursor:grabbing;transform:scale(1.15);border-color:var(--pop);z-index:5}
   .marker::after{
     content:"";position:absolute;top:26px;left:11px;width:2px;height:10px;background:var(--spark);
   }
@@ -305,10 +307,12 @@ function idbAllClips(){
 function persistArmed(){ lsSet('foleybooth:armed', armedClipId || ''); }
 
 /* ---------------- video load ---------------- */
-$('videoInput').addEventListener('change', e => {
-  const f = e.target.files[0];
-  if (!f) return;
-  video.src = URL.createObjectURL(f);
+const DEFAULT_VIDEO = 'default_fireworks.mov';
+const DEFAULT_KEY   = 'foleybooth:default_fireworks';
+// Spots baked into the default fireworks video (seconds).
+const DEFAULT_SPOTS = [0.01, 0.39, 0.74, 4.0];
+
+function showVideoUI(){
   video.style.display = 'block';
   $('loaderBox').style.display = 'none';
   $('fuse').style.display = 'block';
@@ -317,9 +321,44 @@ $('videoInput').addEventListener('change', e => {
   $('muteRow').style.display = 'flex';
   $('exportBtn').disabled = false;
   video.muted = $('muteVideo').checked;
+}
+
+// Wipe every recorded/imported sound and every spot — used when a brand-new
+// video is loaded so you always start from a clean slate.
+function clearSoundsAndSpots(){
+  for (const c of clips){ URL.revokeObjectURL(c.url); idbDeleteClip(c.id).catch(()=>{}); }
+  clips = [];
+  armedClipId = null;
+  persistArmed();
+  renderClips();
+  markers = [];
+  markerCount = 0;
+  renderMarkers();
+}
+
+// Load the built-in fireworks video with its preset spots.
+function loadDefaultVideo(){
+  video.src = DEFAULT_VIDEO;
+  showVideoUI();
+  video.addEventListener('loadedmetadata', function onMeta(){
+    storageKey = DEFAULT_KEY;
+    // Always show the baked-in default spots on load — never restore
+    // saved/edited state, so the page opens identically every time.
+    markers = DEFAULT_SPOTS.map(t => ({ id:'m' + (++markerCount) + '_' + Date.now().toString(36), t }));
+    renderMarkers();
+    saveMarkers();
+  }, {once:true});
+}
+
+$('videoInput').addEventListener('change', e => {
+  const f = e.target.files[0];
+  if (!f) return;
+  clearSoundsAndSpots();                    // new video → clear spots + sounds
+  video.src = URL.createObjectURL(f);
+  showVideoUI();
   video.addEventListener('loadedmetadata', function onMeta(){
     storageKey = computeStorageKey(f, video.duration);
-    loadMarkersForVideo();
+    // start empty for this file; new spots you drop will save under its key
   }, {once:true});
 });
 $('muteVideo').addEventListener('change', e => video.muted = e.target.checked);
@@ -381,7 +420,7 @@ function drawFuse(){
 }
 function fmt(s){
   if (!isFinite(s)) s = 0;
-  const m = Math.floor(s/60), sec = (s%60).toFixed(1).padStart(4,'0');
+  const m = Math.floor(s/60), sec = (s%60).toFixed(2).padStart(5,'0');
   return m + ':' + sec;
 }
 
@@ -568,7 +607,7 @@ function renderMarkers(){
     pin.dataset.id = m.id;
     pin.style.left = pct(m.t) + '%';
     pin.textContent = '✦';
-    pin.onclick = () => { video.currentTime = m.t; drawFuse(); };
+    makeDraggable(pin, m);
     fuse.appendChild(pin);
   }
   // spot list
@@ -580,12 +619,14 @@ function renderMarkers(){
     row.className = 'item';
 
     const time = document.createElement('small');
+    time.className = 'spotTime';
+    time.dataset.id = m.id;
     time.textContent = fmt(m.t);
     time.style.cursor = 'pointer';
     time.onclick = () => { video.currentTime = m.t; drawFuse(); };
 
-    const minus = mkNudge('−', () => nudge(m, -0.1));
-    const plus  = mkNudge('＋', () => nudge(m, +0.1));
+    const minus = mkNudge('−', () => nudge(m, -0.05));
+    const plus  = mkNudge('＋', () => nudge(m, +0.05));
 
     const test = document.createElement('button');
     test.className = 'mini';
@@ -604,11 +645,53 @@ function renderMarkers(){
     box.appendChild(row);
   }
 }
+
+/* Drag a pin along the fuse to move its spot. A quick tap (no real
+   movement) just seeks the video to that spot, like before. */
+function makeDraggable(pin, m){
+  let moved = false, dragging = false;
+  pin.addEventListener('pointerdown', e => {
+    if (!video.duration || exporting) return;
+    e.stopPropagation();              // don't start a fuse scrub
+    e.preventDefault();
+    dragging = true; moved = false;
+    pin.classList.add('dragging');
+    pin.setPointerCapture(e.pointerId);
+  });
+  pin.addEventListener('pointermove', e => {
+    if (!dragging) return;
+    const r = fuse.getBoundingClientRect();
+    const x = Math.min(Math.max(e.clientX - r.left, 0), r.width);
+    const nt = x / r.width * video.duration;
+    if (Math.abs(nt - m.t) > 0.02) moved = true;
+    m.t = nt;
+    pin.style.left = pct(m.t) + '%';
+    // live-update just this spot's time label without a full re-render
+    const lbl = document.querySelector('.spotTime[data-id="' + m.id + '"]');
+    if (lbl) lbl.textContent = fmt(m.t);
+    drawFuse();
+  });
+  const end = e => {
+    if (!dragging) return;
+    dragging = false;
+    pin.classList.remove('dragging');
+    if (moved){
+      markers.sort((a,b) => a.t - b.t);
+      renderMarkers();
+      saveMarkers();
+    } else {
+      video.currentTime = m.t;        // treat as a tap → seek
+      drawFuse();
+    }
+  };
+  pin.addEventListener('pointerup', end);
+  pin.addEventListener('pointercancel', end);
+}
 function mkNudge(label, fn){
   const b = document.createElement('button');
   b.className = 'mini';
   b.textContent = label;
-  b.setAttribute('aria-label', label === '＋' ? 'Nudge cue later 0.1s' : 'Nudge cue earlier 0.1s');
+  b.setAttribute('aria-label', label === '＋' ? 'Nudge cue later 0.05s' : 'Nudge cue earlier 0.05s');
   b.onclick = fn;
   return b;
 }
@@ -743,6 +826,7 @@ function resetExportUI(){
       renderMarkers();
     }
   }catch(e){ /* IndexedDB unavailable — sounds just won't persist */ }
+  loadDefaultVideo();   // open already loaded with the fireworks video + spots
 })();
 </script>
 </body>

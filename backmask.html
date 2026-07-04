@@ -35,7 +35,7 @@
     </div>
     <button id="phraseBtn" class="phrase">
       <div class="pLabel">↻ phrase</div>
-      <div class="pText" id="phraseText">"The Silver Mountain"</div>
+      <div class="pText" id="phraseText">"I Saw the Sign"</div>
       <div class="pHint">tap again to reroll</div>
     </button>
     <button id="exportBtn" class="exportBtn" disabled>↓ export full mix</button>
@@ -152,7 +152,7 @@ function stopRecording(){
   if(activeRecorder&&activeRecorder.state!=='inactive')activeRecorder.stop();
 }
 
-async function play(key,btn,label){
+async function play(key,btn,label,endMsg){
   const buffer=buffers[key];
   if(!buffer)return;
   await ensureCtx();
@@ -169,7 +169,8 @@ async function play(key,btn,label){
   src.onended=()=>{
     btn.classList.remove('now-playing');
     if(currentBtn===btn)currentBtn=null;
-    setStatus('idle');
+    // keep the next step on screen instead of a blank "idle"
+    setStatus(endMsg||'idle');
   };
 }
 
@@ -238,7 +239,7 @@ async function exportMix(){
 
 quickA.addEventListener('click',()=>{if(activeMode==='source')stopRecording();else if(!activeMode)startRecording('source');});
 quickC.addEventListener('click',()=>{if(activeMode==='try')stopRecording();else if(!activeMode)startRecording('try');});
-bA.addEventListener('click',()=>{if(buffers.A)play('A',bA,'original');});
+bA.addEventListener('click',()=>{if(buffers.A)play('A',bA,'original','now play B for your friend');});
 bB.addEventListener('click',()=>{
   bC.disabled=false;
   bD.disabled=false;
@@ -246,10 +247,10 @@ bB.addEventListener('click',()=>{
   bC.classList.add('next-up');
   bD.classList.add('next-up');
   quickC.classList.add('next-up');
-  play('B',bB,'reversed');
+  play('B',bB,'reversed','now tap ● by C to record your friend');
 });
-bC.addEventListener('click',()=>play('C',bC,'your try'));
-bD.addEventListener('click',()=>play('D',bD,'try reversed'));
+bC.addEventListener('click',()=>play('C',bC,'your try','now play D to hear it flipped'));
+bD.addEventListener('click',()=>play('D',bD,'try reversed','done · export the mix or record again'));
 exportBtn.addEventListener('click',exportMix);
 </script>
 </body>
