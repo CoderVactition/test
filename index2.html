@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Foley Booth — dub any video with your mouth</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bungee&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --night:#171233;
+    --panel:#221B44;
+    --panel-2:#2B2355;
+    --line:#3A3170;
+    --cream:#F6EFE3;
+    --dim:#8E86B8;
+    --spark:#FFB03A;
+    --pop:#FF5470;
+    --radius:14px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    background:var(--night);
+    color:var(--cream);
+    font-family:'Space Grotesk',system-ui,sans-serif;
+    padding:16px 14px calc(24px + env(safe-area-inset-bottom));
+    max-width:640px;margin:0 auto;
+    -webkit-tap-highlight-color:transparent;
+  }
+  header{margin-bottom:18px}
+  h1{
+    font-family:'Bungee',cursive;
+    font-size:clamp(1.5rem,7vw,2.2rem);
+    line-height:1.05;
+    color:var(--spark);
+    letter-spacing:.5px;
+  }
+  header p{color:var(--dim);margin-top:6px;font-size:.95rem}
+
+  .card{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:14px;
+    margin-bottom:14px;
+  }
+  .card h2{
+    font-size:.78rem;text-transform:uppercase;letter-spacing:.14em;
+    color:var(--dim);margin-bottom:10px;font-weight:700;
+  }
+
+  /* ---------- video ---------- */
+  #videoWrap{position:relative}
+  video{width:100%;border-radius:10px;display:none;background:#000}
+  .loader{
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    gap:8px;padding:34px 12px;border:2px dashed var(--line);border-radius:10px;
+    color:var(--dim);text-align:center;cursor:pointer;
+  }
+  .loader strong{color:var(--cream);font-size:1.05rem}
+  input[type=file]{display:none}
+
+  /* ---------- fuse timeline ---------- */
+  #fuse{
+    position:relative;height:64px;margin-top:12px;
+    touch-action:none;user-select:none;-webkit-user-select:none;
+    display:none;
+  }
+  #fuseTrack{
+    position:absolute;left:0;right:0;top:38px;height:8px;
+    background:linear-gradient(90deg,#3A3170,#4B3F8C);
+    border-radius:99px;
+  }
+  #fuseBurn{
+    position:absolute;left:0;top:38px;height:8px;width:0;
+    background:linear-gradient(90deg,#B8722A,var(--spark));
+    border-radius:99px;
+  }
+  #playhead{
+    position:absolute;top:28px;width:2px;height:28px;
+    background:var(--spark);left:0;border-radius:2px;
+  }
+  #playhead::after{
+    content:"";position:absolute;top:-7px;left:-4px;width:10px;height:10px;
+    border-radius:50%;background:var(--spark);
+    box-shadow:0 0 10px 2px rgba(255,176,58,.65);
+  }
+  .marker{
+    position:absolute;top:6px;width:26px;height:26px;margin-left:-13px;
+    border-radius:50%;background:var(--panel-2);border:2px solid var(--spark);
+    display:flex;align-items:center;justify-content:center;
+    font-size:.85rem;line-height:1;
+  }
+  .marker::after{
+    content:"";position:absolute;top:26px;left:11px;width:2px;height:10px;background:var(--spark);
+  }
+  .marker.fired{animation:burst .5s ease-out}
+  @keyframes burst{
+    0%{transform:scale(1);box-shadow:0 0 0 0 rgba(255,84,112,.8)}
+    50%{transform:scale(1.45);border-color:var(--pop)}
+    100%{transform:scale(1);box-shadow:0 0 0 26px rgba(255,84,112,0)}
+  }
+  #timeRead{
+    font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+    font-size:.85rem;color:var(--dim);margin-top:8px;display:none;
+  }
+
+  /* ---------- buttons ---------- */
+  .row{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+  button{
+    font-family:inherit;font-weight:700;font-size:.95rem;
+    border:none;border-radius:10px;padding:12px 16px;cursor:pointer;
+    background:var(--panel-2);color:var(--cream);
+  }
+  button:focus-visible{outline:2px solid var(--spark);outline-offset:2px}
+  button.primary{background:var(--spark);color:#241500}
+  button.danger-text{color:var(--pop)}
+  button:disabled{opacity:.4;cursor:default}
+  button.recording{background:var(--pop);color:#fff;animation:pulse 1s infinite}
+  @keyframes pulse{50%{opacity:.75}}
+  .grow{flex:1}
+
+  /* ---------- clips & markers lists ---------- */
+  .item{
+    display:flex;align-items:center;gap:10px;
+    padding:10px 4px;border-bottom:1px solid var(--line);
+  }
+  .item:last-child{border-bottom:none}
+  .item .name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .item small{color:var(--dim);font-family:ui-monospace,Menlo,monospace}
+  .mini{
+    padding:8px 10px;font-size:.85rem;border-radius:8px;background:var(--panel-2);
+  }
+  .armed{border:2px solid var(--spark);border-radius:10px}
+  select{
+    background:var(--panel-2);color:var(--cream);border:1px solid var(--line);
+    border-radius:8px;padding:8px;font-family:inherit;max-width:130px;
+  }
+  .empty{color:var(--dim);font-size:.9rem;padding:6px 2px}
+  .hint{color:var(--dim);font-size:.85rem;margin-top:10px}
+  #micError{color:var(--pop);font-size:.9rem;margin-top:8px;display:none}
+
+  label.toggle{display:flex;align-items:center;gap:8px;color:var(--dim);font-size:.9rem;margin-top:12px}
+  @media (prefers-reduced-motion:reduce){
+    .marker.fired{animation:none;border-color:var(--pop)}
+    button.recording{animation:none}
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>FOLEY<br>BOOTH</h1>
+  <p>Load a video, record a sound with your mouth, drop it on the fuse. Press play and hear it fire.</p>
+</header>
+
+<!-- ============ VIDEO + FUSE ============ -->
+<section class="card">
+  <h2>1 · Video</h2>
+  <div id="videoWrap">
+    <label class="loader" id="loaderBox">
+      <strong>Pick a video</strong>
+      <span>It stays on your device — nothing uploads</span>
+      <input type="file" id="videoInput" accept="video/*">
+    </label>
+    <video id="video" playsinline preload="metadata"></video>
+  </div>
+
+  <div id="fuse">
+    <div id="fuseTrack"></div>
+    <div id="fuseBurn"></div>
+    <div id="playhead"></div>
+  </div>
+  <div id="timeRead">0:00.0 / 0:00.0</div>
+
+  <div class="row" id="transport" style="display:none">
+    <button id="playBtn" class="primary grow">▶ Play</button>
+    <button id="addMarkerBtn" class="grow">＋ Drop sound here</button>
+  </div>
+  <label class="toggle" id="muteRow" style="display:none">
+    <input type="checkbox" id="muteVideo" checked> Mute the video's own audio
+  </label>
+</section>
+
+<!-- ============ SOUND BOOTH ============ -->
+<section class="card">
+  <h2>2 · Sound booth</h2>
+  <div class="row" style="margin-top:0">
+    <button id="recBtn" class="grow">● Record a sound</button>
+    <label class="grow" style="display:contents">
+      <button class="grow" onclick="document.getElementById('audioInput').click()">Import audio</button>
+      <input type="file" id="audioInput" accept="audio/*">
+    </label>
+  </div>
+  <div id="micError">Microphone blocked. Allow mic access in your browser settings, then try again.</div>
+  <div id="clipList"><div class="empty">No sounds yet. Record your best firework.</div></div>
+  <p class="hint">Tap a sound to arm it — new markers use the armed sound.</p>
+</section>
+
+<!-- ============ MARKERS ============ -->
+<section class="card">
+  <h2>3 · Cue sheet</h2>
+  <div id="markerList"><div class="empty">No cues yet. Scrub the video to the moment, then "Drop sound here".</div></div>
+</section>
+
+<!-- ============ EXPORT ============ -->
+<section class="card">
+  <h2>4 · Export</h2>
+  <div class="row" style="margin-top:0">
+    <button id="exportBtn" class="primary grow" disabled>⬇ Export video with sounds</button>
+    <button id="cancelExportBtn" class="grow" style="display:none">Stop</button>
+  </div>
+  <div id="exportStatus" class="hint">Plays the whole video once in real time while recording the mix. The mute toggle above decides if the original audio is kept.</div>
+  <a id="downloadLink" style="display:none;margin-top:12px" class="mini"></a>
+</section>
+
+<script>
+const $ = id => document.getElementById(id);
+const video = $('video');
+
+let clips = [];        // {id, name, url}
+let markers = [];      // {id, t, clipId}
+let armedClipId = null;
+let clipCount = 0, markerCount = 0;
+let lastTime = 0;
+let rafId = null;
+
+/* export state */
+let exporting = false;
+let audioCtx = null, videoSrcNode = null, videoGain = null, mixDest = null;
+let mediaRec = null, exportChunks = [], drawRafId = null;
+let clipBuffers = {};   // clipId -> decoded AudioBuffer
+const exCanvas = document.createElement('canvas');
+exCanvas.style.cssText = 'position:fixed;left:-9999px;top:0';
+document.body.appendChild(exCanvas);
+const exCtx2d = exCanvas.getContext('2d');
+
+/* ---------------- video load ---------------- */
+$('videoInput').addEventListener('change', e => {
+  const f = e.target.files[0];
+  if (!f) return;
+  video.src = URL.createObjectURL(f);
+  video.style.display = 'block';
+  $('loaderBox').style.display = 'none';
+  $('fuse').style.display = 'block';
+  $('timeRead').style.display = 'block';
+  $('transport').style.display = 'flex';
+  $('muteRow').style.display = 'flex';
+  $('exportBtn').disabled = false;
+  video.muted = $('muteVideo').checked;
+});
+$('muteVideo').addEventListener('change', e => video.muted = e.target.checked);
+
+/* ---------------- transport ---------------- */
+$('playBtn').addEventListener('click', () => {
+  if (video.paused) video.play(); else video.pause();
+});
+video.addEventListener('play', () => {
+  $('playBtn').textContent = '❚❚ Pause';
+  lastTime = video.currentTime;
+  loop();
+});
+video.addEventListener('pause', () => {
+  $('playBtn').textContent = '▶ Play';
+  cancelAnimationFrame(rafId);
+  drawFuse();
+});
+video.addEventListener('seeked', () => { lastTime = video.currentTime; drawFuse(); });
+video.addEventListener('loadedmetadata', drawFuse);
+
+function loop(){
+  const t = video.currentTime;
+  // fire any marker we crossed since last frame
+  for (const m of markers){
+    if (m.t > lastTime && m.t <= t) fire(m);
+  }
+  lastTime = t;
+  drawFuse();
+  if (!video.paused && !video.ended) rafId = requestAnimationFrame(loop);
+}
+
+function fire(m){
+  const clip = clips.find(c => c.id === m.clipId);
+  if (clip){
+    if (exporting && clipBuffers[clip.id]){
+      const src = audioCtx.createBufferSource();
+      src.buffer = clipBuffers[clip.id];
+      src.connect(mixDest);              // into the recording
+      src.connect(audioCtx.destination); // and to your ears
+      src.start();
+    } else {
+      new Audio(clip.url).play().catch(()=>{});
+    }
+  }
+  const el = document.querySelector('.marker[data-id="'+m.id+'"]');
+  if (el){ el.classList.remove('fired'); void el.offsetWidth; el.classList.add('fired'); }
+}
+
+/* ---------------- fuse (timeline) ---------------- */
+const fuse = $('fuse');
+function pct(t){ return video.duration ? (t / video.duration * 100) : 0; }
+
+function drawFuse(){
+  const p = pct(video.currentTime);
+  $('playhead').style.left = p + '%';
+  $('fuseBurn').style.width = p + '%';
+  $('timeRead').textContent = fmt(video.currentTime) + ' / ' + fmt(video.duration || 0);
+}
+function fmt(s){
+  if (!isFinite(s)) s = 0;
+  const m = Math.floor(s/60), sec = (s%60).toFixed(1).padStart(4,'0');
+  return m + ':' + sec;
+}
+
+/* scrub by touch/drag */
+let scrubbing = false;
+fuse.addEventListener('pointerdown', e => { scrubbing = true; scrub(e); fuse.setPointerCapture(e.pointerId); });
+fuse.addEventListener('pointermove', e => { if (scrubbing) scrub(e); });
+fuse.addEventListener('pointerup',   () => scrubbing = false);
+function scrub(e){
+  if (!video.duration || exporting) return;
+  const r = fuse.getBoundingClientRect();
+  const x = Math.min(Math.max(e.clientX - r.left, 0), r.width);
+  video.currentTime = x / r.width * video.duration;
+  drawFuse();
+}
+
+/* ---------------- recording ---------------- */
+let recorder = null, chunks = [];
+$('recBtn').addEventListener('click', async () => {
+  if (recorder && recorder.state === 'recording'){ recorder.stop(); return; }
+  try{
+    const stream = await navigator.mediaDevices.getUserMedia({audio:true});
+    $('micError').style.display = 'none';
+    const mime = MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm'
+               : MediaRecorder.isTypeSupported('audio/mp4') ? 'audio/mp4' : '';
+    recorder = new MediaRecorder(stream, mime ? {mimeType:mime} : undefined);
+    chunks = [];
+    recorder.ondataavailable = e => chunks.push(e.data);
+    recorder.onstop = () => {
+      stream.getTracks().forEach(tr => tr.stop());
+      const blob = new Blob(chunks, {type: recorder.mimeType || 'audio/webm'});
+      addClip(URL.createObjectURL(blob), 'Take ' + (++clipCount));
+      $('recBtn').textContent = '● Record a sound';
+      $('recBtn').classList.remove('recording');
+    };
+    recorder.start();
+    $('recBtn').textContent = '■ Stop recording';
+    $('recBtn').classList.add('recording');
+  }catch(err){
+    $('micError').style.display = 'block';
+  }
+});
+
+$('audioInput').addEventListener('change', e => {
+  const f = e.target.files[0];
+  if (!f) return;
+  addClip(URL.createObjectURL(f), f.name.replace(/\.[^.]+$/,''));
+  e.target.value = '';
+});
+
+function addClip(url, name){
+  const id = 'c' + Date.now() + Math.random().toString(36).slice(2,6);
+  clips.push({id, url, name});
+  armedClipId = id;              // newest take is armed automatically
+  renderClips();
+  renderMarkers();
+}
+
+function renderClips(){
+  const box = $('clipList');
+  if (!clips.length){ box.innerHTML = '<div class="empty">No sounds yet. Record your best firework.</div>'; return; }
+  box.innerHTML = '';
+  for (const c of clips){
+    const row = document.createElement('div');
+    row.className = 'item' + (c.id === armedClipId ? ' armed' : '');
+    row.style.padding = '10px 8px';
+
+    const name = document.createElement('div');
+    name.className = 'name';
+    name.textContent = (c.id === armedClipId ? '🎯 ' : '') + c.name;
+    name.onclick = () => { armedClipId = c.id; renderClips(); };
+
+    const play = document.createElement('button');
+    play.className = 'mini';
+    play.textContent = '▶';
+    play.setAttribute('aria-label','Preview ' + c.name);
+    play.onclick = () => new Audio(c.url).play();
+
+    const del = document.createElement('button');
+    del.className = 'mini danger-text';
+    del.textContent = '✕';
+    del.setAttribute('aria-label','Delete ' + c.name);
+    del.onclick = () => {
+      clips = clips.filter(x => x.id !== c.id);
+      markers = markers.filter(m => m.clipId !== c.id);
+      if (armedClipId === c.id) armedClipId = clips.length ? clips[clips.length-1].id : null;
+      renderClips(); renderMarkers();
+    };
+
+    row.append(name, play, del);
+    box.appendChild(row);
+  }
+}
+
+/* ---------------- markers ---------------- */
+$('addMarkerBtn').addEventListener('click', () => {
+  if (!video.duration){ return; }
+  if (!armedClipId){ $('recBtn').scrollIntoView({behavior:'smooth'}); $('recBtn').focus(); return; }
+  markers.push({ id:'m' + (++markerCount), t: video.currentTime, clipId: armedClipId });
+  markers.sort((a,b) => a.t - b.t);
+  renderMarkers();
+});
+
+function renderMarkers(){
+  // pins on the fuse
+  fuse.querySelectorAll('.marker').forEach(el => el.remove());
+  for (const m of markers){
+    const pin = document.createElement('div');
+    pin.className = 'marker';
+    pin.dataset.id = m.id;
+    pin.style.left = pct(m.t) + '%';
+    pin.textContent = '✦';
+    pin.onclick = () => { video.currentTime = m.t; drawFuse(); };
+    fuse.appendChild(pin);
+  }
+  // cue sheet
+  const box = $('markerList');
+  if (!markers.length){ box.innerHTML = '<div class="empty">No cues yet. Scrub the video to the moment, then "Drop sound here".</div>'; return; }
+  box.innerHTML = '';
+  for (const m of markers){
+    const row = document.createElement('div');
+    row.className = 'item';
+
+    const time = document.createElement('small');
+    time.textContent = fmt(m.t);
+    time.style.cursor = 'pointer';
+    time.onclick = () => { video.currentTime = m.t; drawFuse(); };
+
+    const sel = document.createElement('select');
+    for (const c of clips){
+      const o = document.createElement('option');
+      o.value = c.id; o.textContent = c.name;
+      if (c.id === m.clipId) o.selected = true;
+      sel.appendChild(o);
+    }
+    sel.onchange = () => m.clipId = sel.value;
+
+    const minus = mkNudge('−', () => nudge(m, -0.1));
+    const plus  = mkNudge('＋', () => nudge(m, +0.1));
+
+    const test = document.createElement('button');
+    test.className = 'mini';
+    test.textContent = '▶';
+    test.setAttribute('aria-label','Test cue');
+    test.onclick = () => fire(m);
+
+    const del = document.createElement('button');
+    del.className = 'mini danger-text';
+    del.textContent = '✕';
+    del.setAttribute('aria-label','Delete cue');
+    del.onclick = () => { markers = markers.filter(x => x.id !== m.id); renderMarkers(); };
+
+    row.append(time, sel, minus, plus, test, del);
+    box.appendChild(row);
+  }
+}
+function mkNudge(label, fn){
+  const b = document.createElement('button');
+  b.className = 'mini';
+  b.textContent = label;
+  b.setAttribute('aria-label', label === '＋' ? 'Nudge cue later 0.1s' : 'Nudge cue earlier 0.1s');
+  b.onclick = fn;
+  return b;
+}
+function nudge(m, d){
+  m.t = Math.min(Math.max(m.t + d, 0), video.duration || m.t);
+  markers.sort((a,b) => a.t - b.t);
+  renderMarkers();
+}
+
+/* ---------------- export ---------------- */
+function pickMime(){
+  const options = [
+    'video/mp4',
+    'video/webm;codecs=vp9,opus',
+    'video/webm;codecs=vp8,opus',
+    'video/webm'
+  ];
+  return options.find(m => window.MediaRecorder && MediaRecorder.isTypeSupported(m)) || '';
+}
+
+async function decodeClips(){
+  for (const m of markers){
+    const clip = clips.find(c => c.id === m.clipId);
+    if (!clip || clipBuffers[clip.id]) continue;
+    const ab = await (await fetch(clip.url)).arrayBuffer();
+    clipBuffers[clip.id] = await audioCtx.decodeAudioData(ab);
+  }
+}
+
+$('exportBtn').addEventListener('click', async () => {
+  if (!video.duration || exporting) return;
+  const status = $('exportStatus');
+  try{
+    audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+    if (audioCtx.state === 'suspended') await audioCtx.resume();
+    status.textContent = 'Preparing sounds…';
+    await decodeClips();
+
+    // video frames -> canvas -> stream
+    exCanvas.width  = video.videoWidth;
+    exCanvas.height = video.videoHeight;
+    const canvasStream = exCanvas.captureStream(30);
+
+    // audio mixer
+    mixDest = audioCtx.createMediaStreamDestination();
+    if (!videoSrcNode){
+      videoSrcNode = audioCtx.createMediaElementSource(video);
+      videoGain = audioCtx.createGain();
+      videoSrcNode.connect(videoGain);
+      videoGain.connect(audioCtx.destination);
+    }
+    videoGain.connect(mixDest); // original audio only heard if mute toggle is off
+
+    const mime = pickMime();
+    if (!mime){ status.textContent = 'This browser can\'t record video. Try Chrome, or open the file in your phone\'s browser.'; return; }
+    const stream = new MediaStream([
+      ...canvasStream.getVideoTracks(),
+      ...mixDest.stream.getAudioTracks()
+    ]);
+    mediaRec = new MediaRecorder(stream, {mimeType: mime});
+    exportChunks = [];
+    mediaRec.ondataavailable = e => { if (e.data.size) exportChunks.push(e.data); };
+    mediaRec.onstop = () => finishExport(mime);
+
+    // roll from the top
+    exporting = true;
+    $('exportBtn').disabled = true;
+    $('cancelExportBtn').style.display = 'block';
+    $('addMarkerBtn').disabled = true;
+    $('downloadLink').style.display = 'none';
+    video.pause();
+    video.currentTime = 0;
+    await new Promise(res => video.addEventListener('seeked', res, {once:true}));
+    lastTime = 0;
+    mediaRec.start(250);
+    drawExportFrame();
+    await video.play();
+  }catch(err){
+    exporting = false;
+    status.textContent = 'Export failed: ' + err.message;
+    resetExportUI();
+  }
+});
+
+function drawExportFrame(){
+  exCtx2d.drawImage(video, 0, 0, exCanvas.width, exCanvas.height);
+  $('exportStatus').textContent = 'Recording the mix… ' + fmt(video.currentTime) + ' / ' + fmt(video.duration) + ' (keep this tab open)';
+  if (exporting) drawRafId = requestAnimationFrame(drawExportFrame);
+}
+
+video.addEventListener('ended', () => {
+  if (exporting && mediaRec && mediaRec.state === 'recording') mediaRec.stop();
+});
+$('cancelExportBtn').addEventListener('click', () => {
+  if (mediaRec && mediaRec.state === 'recording') mediaRec.stop();
+  video.pause();
+});
+
+function finishExport(mime){
+  exporting = false;
+  cancelAnimationFrame(drawRafId);
+  if (videoGain) try{ videoGain.disconnect(mixDest); }catch(e){}
+  const ext = mime.includes('mp4') ? 'mp4' : 'webm';
+  const blob = new Blob(exportChunks, {type: mime});
+  const link = $('downloadLink');
+  link.href = URL.createObjectURL(blob);
+  link.download = 'foley-booth.' + ext;
+  link.textContent = '⬇ Save foley-booth.' + ext + ' (' + (blob.size/1048576).toFixed(1) + ' MB)';
+  link.style.display = 'inline-block';
+  $('exportStatus').textContent = 'Done. Tap the link to save it, then post away.';
+  resetExportUI();
+}
+
+function resetExportUI(){
+  $('exportBtn').disabled = false;
+  $('cancelExportBtn').style.display = 'none';
+  $('addMarkerBtn').disabled = false;
+}
+</script>
+</body>
+</html>
