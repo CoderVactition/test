@@ -1,256 +1,105 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
-<title>BACKMASK</title>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,ital,wght@9..144,0,300;9..144,0,500;9..144,1,300;9..144,1,500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<style>:root{--bg:#0a0908;--ink:#f4ede4;--dim:#6b6358;--accent:#e63946;--gold:#d4a574;--line:#2a2622}*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}body{background:var(--bg);color:var(--ink);font-family:'JetBrains Mono',monospace;min-height:100vh;min-height:100dvh;display:flex;align-items:center;justify-content:center;padding:20px;background-image:repeating-linear-gradient(0deg,rgba(255,255,255,0.015) 0,rgba(255,255,255,0.015) 1px,transparent 1px,transparent 3px)}.frame{width:100%;max-width:480px;border:1px solid var(--line);padding:24px 22px;background:rgba(15,12,10,0.4)}.header{display:flex;align-items:center;gap:8px;font-size:10px;letter-spacing:0.25em;color:var(--dim);margin-bottom:18px;text-transform:uppercase}.dot{width:6px;height:6px;border-radius:50%;background:var(--gold);box-shadow:0 0 8px var(--gold)}.brand{color:var(--ink);font-weight:500}.ver{margin-left:auto}h1{font-family:'Fraunces',serif;font-weight:300;font-size:28px;line-height:1;letter-spacing:-0.02em;margin-bottom:18px;white-space:nowrap}h1 em{font-style:italic;color:var(--gold);font-weight:500}.stack{display:flex;flex-direction:column;gap:8px;margin-bottom:22px}.row{display:flex;gap:6px;align-items:stretch}.row .play{flex:1;font-family:inherit;background:transparent;color:var(--ink);border:1px solid var(--line);cursor:pointer;padding:22px 20px;text-align:left;-webkit-appearance:none;appearance:none;transition:border-color .2s ease,background .2s ease,opacity .2s ease;display:flex;align-items:center;gap:18px}.row .play.now-playing{border-color:var(--gold);background:rgba(212,165,116,0.06)}.row .play:disabled{opacity:.2}.row .play.next-up:not(:disabled){border-color:var(--gold);animation:nextPulse 2s ease-in-out infinite}.row .play.next-up:not(:disabled) .num{color:var(--gold)}@keyframes nextPulse{0%,100%{box-shadow:0 0 0 0 rgba(212,165,116,0);border-color:var(--gold)}50%{box-shadow:0 0 0 4px rgba(212,165,116,0.15);border-color:#e8c294}}.row .play .num{font-family:'Fraunces',serif;font-weight:300;font-size:32px;line-height:1;color:var(--gold);width:28px;flex-shrink:0;transition:color .2s ease}.row .play .label{flex:1;display:flex;flex-direction:column;gap:4px}.row .play .title{font-size:13px;letter-spacing:0.08em;text-transform:uppercase;font-weight:500}.row .play .meta{font-size:9px;color:var(--dim);letter-spacing:0.18em;text-transform:uppercase}.row .play .arrow{color:var(--dim);font-size:14px;transition:color .2s ease}.row .play.now-playing .arrow,.row .play.next-up:not(:disabled) .arrow{color:var(--gold)}.row .quickRec{width:60px;border:1px solid var(--line);background:transparent;color:var(--accent);cursor:pointer;-webkit-appearance:none;appearance:none;font-size:18px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:inherit;transition:border-color .2s ease,background .2s ease}.row .quickRec:disabled{opacity:.3}.row .quickRec.next-up:not(:disabled){border-color:var(--accent);animation:recPulse 1.6s ease-in-out infinite}@keyframes recPulse{0%,100%{box-shadow:0 0 0 0 rgba(230,57,70,0)}50%{box-shadow:0 0 0 4px rgba(230,57,70,0.2)}}.row .quickRec.recording{background:var(--accent);color:var(--bg);border-color:var(--accent);animation:blink 1s steps(2) infinite;font-size:14px}.quickSpacer{width:60px;flex-shrink:0}.phrase{border:1px solid var(--line);padding:18px 16px;margin-bottom:18px;text-align:center;cursor:pointer;-webkit-appearance:none;appearance:none;background:transparent;width:100%;color:var(--ink);font-family:inherit;display:block}.phrase .pLabel{font-size:9px;letter-spacing:0.3em;color:var(--dim);text-transform:uppercase;margin-bottom:8px}.phrase .pText{font-family:'Fraunces',serif;font-style:italic;font-weight:300;font-size:22px;line-height:1.3;color:var(--gold)}.phrase .pHint{font-size:8px;letter-spacing:0.25em;color:var(--dim);text-transform:uppercase;margin-top:10px}@keyframes blink{0%,100%{opacity:1}50%{opacity:.65}}.exportBtn{width:100%;padding:16px;background:var(--gold);color:var(--bg);border:1px solid var(--gold);font-family:inherit;font-size:11px;font-weight:500;letter-spacing:0.3em;text-transform:uppercase;cursor:pointer;-webkit-appearance:none;appearance:none}.exportBtn:disabled{opacity:.2;background:transparent;color:var(--gold)}.status{margin-top:14px;padding-top:12px;border-top:1px solid var(--line);font-size:9px;color:var(--dim);display:flex;justify-content:space-between;letter-spacing:0.2em;text-transform:uppercase}.status span:last-child{color:var(--ink)}</style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Kelsi's Game Booth</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bungee&family=Fraunces:opsz,ital,wght@9..144,0,300;9..144,1,500&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0e0b1e;
+    --ink:#f4ede4;
+    --dim:#8e86b8;
+    --line:#2a2440;
+    --spark:#FFB03A;
+    --pop:#FF5470;
+    --gold:#d4a574;
+    --accent:#e63946;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  html,body{min-height:100%}
+  body{
+    background:
+      radial-gradient(120% 80% at 50% -10%, #241a4d 0%, transparent 60%),
+      var(--bg);
+    color:var(--ink);
+    font-family:'Space Grotesk',system-ui,sans-serif;
+    min-height:100vh;min-height:100dvh;
+    display:flex;flex-direction:column;justify-content:center;
+    padding:32px 18px calc(40px + env(safe-area-inset-bottom));
+    max-width:560px;margin:0 auto;
+  }
+  header{text-align:center;margin-bottom:32px}
+  .kicker{
+    font-size:11px;letter-spacing:.32em;text-transform:uppercase;
+    color:var(--dim);margin-bottom:12px;
+  }
+  h1{
+    font-family:'Bungee',cursive;
+    font-size:clamp(2rem,10vw,3rem);
+    line-height:.95;color:var(--spark);letter-spacing:.5px;
+  }
+  header p{color:var(--dim);margin-top:14px;font-size:.95rem;line-height:1.5}
+
+  .cards{display:flex;flex-direction:column;gap:16px}
+  .tile{
+    display:block;text-decoration:none;color:inherit;
+    border:1px solid var(--line);border-radius:16px;
+    padding:22px 20px;position:relative;overflow:hidden;
+    background:rgba(255,255,255,0.02);
+    transition:border-color .2s ease, transform .12s ease, background .2s ease;
+  }
+  .tile:hover,.tile:focus-visible{transform:translateY(-2px);outline:none}
+  .tile .badge{
+    font-size:10px;letter-spacing:.25em;text-transform:uppercase;
+    color:var(--dim);margin-bottom:10px;
+  }
+  .tile h2{font-size:1.6rem;line-height:1;margin-bottom:8px}
+  .tile p{color:var(--dim);font-size:.9rem;line-height:1.45;max-width:38ch}
+  .tile .go{
+    margin-top:16px;display:inline-flex;align-items:center;gap:8px;
+    font-size:.85rem;font-weight:700;letter-spacing:.04em;
+  }
+  .tile .go .arrow{transition:transform .2s ease}
+  .tile:hover .go .arrow{transform:translateX(4px)}
+
+  /* Foley Booth tile */
+  .tile.foley h2{font-family:'Bungee',cursive;color:var(--spark);font-size:1.5rem}
+  .tile.foley .go{color:var(--spark)}
+  .tile.foley:hover,.tile.foley:focus-visible{border-color:var(--spark);background:rgba(255,176,58,0.06)}
+
+  /* Backmask tile */
+  .tile.backmask h2{font-family:'Fraunces',serif;font-weight:500;font-style:italic;color:var(--gold)}
+  .tile.backmask .go{color:var(--gold)}
+  .tile.backmask:hover,.tile.backmask:focus-visible{border-color:var(--gold);background:rgba(212,165,116,0.06)}
+
+  footer{text-align:center;margin-top:28px;color:var(--dim);font-size:11px;letter-spacing:.15em;text-transform:uppercase}
+</style>
 </head>
 <body>
-  <div class="frame">
-    <div class="header">
-      <div class="dot"></div>
-      <span class="brand">BACKMASK</span>
-      <span class="ver">v.17</span>
-    </div>
-    <h1>Sing it <em>backwards.</em></h1>
-    <div class="stack">
-      <div class="row">
-        <button id="bA" class="play next-up"><span class="num">A</span><span class="label"><span class="title">Start singing here!</span><span class="meta">your source clip</span></span><span class="arrow">▶</span></button>
-        <button id="quickA" class="quickRec next-up">●</button>
-      </div>
-      <div class="row">
-        <button id="bB" class="play" disabled><span class="num">B</span><span class="label"><span class="title">Play this for your friend</span><span class="meta">reversed source</span></span><span class="arrow">▶</span></button>
-        <span class="quickSpacer"></span>
-      </div>
-      <div class="row">
-        <button id="bC" class="play" disabled><span class="num">C</span><span class="label"><span class="title">Record your friend saying B</span><span class="meta">their mimic</span></span><span class="arrow">▶</span></button>
-        <button id="quickC" class="quickRec" disabled>●</button>
-      </div>
-      <div class="row">
-        <button id="bD" class="play" disabled><span class="num">D</span><span class="label"><span class="title">See how they did</span><span class="meta">mimic flipped</span></span><span class="arrow">▶</span></button>
-        <span class="quickSpacer"></span>
-      </div>
-    </div>
-    <button id="phraseBtn" class="phrase">
-      <div class="pLabel">↻ phrase</div>
-      <div class="pText" id="phraseText">tap to roll a phrase</div>
-      <div class="pHint">tap again to reroll</div>
-    </button>
-    <button id="exportBtn" class="exportBtn" disabled>↓ export full mix</button>
-    <div class="status">
-      <span>signal</span>
-      <span id="status">tap ● to start recording</span>
-    </div>
-  </div>
-<script>
-const ADJ=['sleepy','tiny','golden','dusty','sneaky','electric','ancient','salty','wild','frozen','lonely','broken','secret','restless','dizzy','crooked','silver','hollow','tangled','bitter','gentle','rusty','hidden','foolish','clever','lucky','glowing','quiet','bored','furious','enormous','invisible'];
-const NOUN=['cat','wizard','robot','ghost','dragon','pirate','moon','river','mountain','tower','garden','kitchen','bicycle','rocket','mirror','shadow','whisper','dream','jacket','ocean','forest','candle','train','balloon','telephone','painting','monster','pickle','bagel','cloud','magnet','pillow','mailman','grandma','penguin','submarine','volcano','lighthouse','sandwich','umbrella'];
-const VERB=['kissed','chased','sang to','waved at','painted','juggled','swallowed','hugged','photographed','hypnotized','ignored','followed','stole','untangled','balanced','broke','married','tickled','interviewed','arrested','befriended','outran','impressed','fed','tackled','rescued','annoyed','copied','outsmarted','warned'];
-const TEMPLATES=['{adj} {noun}','{adj} {adj} {noun}','the {adj} {noun}','{noun} and {noun}','{verb} the {noun}','{adj} {noun} {verb}'];
-function pick(a){return a[Math.floor(Math.random()*a.length)];}
-function generatePhrase(){return pick(TEMPLATES).replace(/\{(adj|noun|verb)\}/g,(_,k)=>k==='adj'?pick(ADJ):k==='noun'?pick(NOUN):pick(VERB));}
+  <header>
+    <div class="kicker">Kelsi's</div>
+    <h1>GAME<br>BOOTH</h1>
+    <p>Two little sound games you play with your own voice. Pick one to start.</p>
+  </header>
 
-const phraseBtn=document.getElementById('phraseBtn');
-const phraseText=document.getElementById('phraseText');
-phraseBtn.addEventListener('click',()=>{phraseText.textContent='"'+generatePhrase()+'"';});
+  <main class="cards">
+    <a class="tile foley" href="foley-booth.html">
+      <div class="badge">Game 01 · Video dub</div>
+      <h2>FOLEY BOOTH</h2>
+      <p>Load a video, drop spots on the timeline, then record the one sound that fires at every spot. Dub any clip with your mouth.</p>
+      <span class="go">Play <span class="arrow">→</span></span>
+    </a>
 
-const quickA=document.getElementById('quickA');
-const quickC=document.getElementById('quickC');
-const exportBtn=document.getElementById('exportBtn');
-const bA=document.getElementById('bA');
-const bB=document.getElementById('bB');
-const bC=document.getElementById('bC');
-const bD=document.getElementById('bD');
-const statusEl=document.getElementById('status');
+    <a class="tile backmask" href="backmask.html">
+      <div class="badge">Game 02 · Reverse talk</div>
+      <h2>Backmask</h2>
+      <p>Sing a phrase, hear it flipped, then challenge a friend to mimic the reversed sound. Flip their try to see how close they got.</p>
+      <span class="go">Play <span class="arrow">→</span></span>
+    </a>
+  </main>
 
-let audioCtx;
-const buffers={A:null,B:null,C:null,D:null};
-let currentSource,currentBtn;
-let activeRecorder=null,activeChunks=[],activeMode=null;
-
-function setStatus(s){statusEl.textContent=s;}
-function refreshExportBtn(){exportBtn.disabled=!['A','B','C','D'].some(k=>buffers[k]);}
-
-function reverseBuffer(buffer){
-  const r=audioCtx.createBuffer(buffer.numberOfChannels,buffer.length,buffer.sampleRate);
-  for(let ch=0;ch<buffer.numberOfChannels;ch++){
-    const s=buffer.getChannelData(ch);
-    const d=r.getChannelData(ch);
-    for(let i=0,n=s.length;i<n;i++)d[i]=s[n-1-i];
-  }
-  return r;
-}
-
-async function ensureCtx(){
-  if(!audioCtx)audioCtx=new (window.AudioContext||window.webkitAudioContext)();
-  if(audioCtx.state==='suspended')await audioCtx.resume();
-}
-
-async function decodeBlob(blob){
-  await ensureCtx();
-  const ab=await blob.arrayBuffer();
-  return await audioCtx.decodeAudioData(ab);
-}
-
-function loadSource(buffer){
-  buffers.A=buffer;
-  buffers.B=reverseBuffer(buffer);
-  buffers.C=null;
-  buffers.D=null;
-  bB.disabled=false;
-  bB.classList.add('next-up');
-  refreshExportBtn();
-}
-
-async function startRecording(mode){
-  await ensureCtx();
-  try{
-    const stream=await navigator.mediaDevices.getUserMedia({audio:true});
-    activeChunks=[];
-    activeMode=mode;
-    let mime='';
-    if(MediaRecorder.isTypeSupported('audio/mp4'))mime='audio/mp4';
-    else if(MediaRecorder.isTypeSupported('audio/webm'))mime='audio/webm';
-    activeRecorder=mime?new MediaRecorder(stream,{mimeType:mime}):new MediaRecorder(stream);
-    activeRecorder.ondataavailable=e=>{if(e.data.size>0)activeChunks.push(e.data);};
-    activeRecorder.onstop=async()=>{
-      stream.getTracks().forEach(t=>t.stop());
-      const blob=new Blob(activeChunks,{type:activeRecorder.mimeType});
-      try{
-        const buf=await decodeBlob(blob);
-        if(mode==='source'){loadSource(buf);setStatus('source recorded · play B for friend');}
-        else{
-          buffers.C=buf;
-          buffers.D=reverseBuffer(buf);
-          setStatus('try ready · play D to hear it flipped');
-          refreshExportBtn();
-        }
-      }catch(err){setStatus('decode failed');}
-      activeRecorder=null;
-      activeMode=null;
-      resetRecButtonsUI();
-    };
-    activeRecorder.start();
-    setRecButtonsUI(mode);
-    setStatus(mode==='source'?'recording source':'recording try');
-  }catch(err){setStatus('mic denied');}
-}
-
-function setRecButtonsUI(mode){
-  if(mode==='source'){quickA.classList.add('recording');quickA.textContent='■';}
-  else{quickC.classList.add('recording');quickC.textContent='■';}
-}
-
-function resetRecButtonsUI(){
-  quickA.classList.remove('recording');quickA.textContent='●';
-  quickC.classList.remove('recording');quickC.textContent='●';
-}
-
-function stopRecording(){
-  if(activeRecorder&&activeRecorder.state!=='inactive')activeRecorder.stop();
-}
-
-async function play(key,btn,label){
-  const buffer=buffers[key];
-  if(!buffer)return;
-  await ensureCtx();
-  if(currentSource){try{currentSource.stop();}catch(e){}}
-  if(currentBtn)currentBtn.classList.remove('now-playing');
-  const src=audioCtx.createBufferSource();
-  src.buffer=buffer;
-  src.connect(audioCtx.destination);
-  src.start();
-  currentSource=src;
-  currentBtn=btn;
-  btn.classList.add('now-playing');
-  setStatus('playing '+label);
-  src.onended=()=>{
-    btn.classList.remove('now-playing');
-    if(currentBtn===btn)currentBtn=null;
-    setStatus('idle');
-  };
-}
-
-function encodeWAV(buffer){
-  const nc=buffer.numberOfChannels,sr=buffer.sampleRate,len=buffer.length;
-  const ba=nc*2,ds=len*ba;
-  const ab=new ArrayBuffer(44+ds);
-  const v=new DataView(ab);
-  const w=(o,s)=>{for(let i=0;i<s.length;i++)v.setUint8(o+i,s.charCodeAt(i));};
-  w(0,'RIFF');v.setUint32(4,36+ds,true);w(8,'WAVE');w(12,'fmt ');
-  v.setUint32(16,16,true);v.setUint16(20,1,true);v.setUint16(22,nc,true);
-  v.setUint32(24,sr,true);v.setUint32(28,sr*ba,true);v.setUint16(32,ba,true);v.setUint16(34,16,true);
-  w(36,'data');v.setUint32(40,ds,true);
-  let off=44;
-  const chs=[];
-  for(let c=0;c<nc;c++)chs.push(buffer.getChannelData(c));
-  for(let i=0;i<len;i++){
-    for(let c=0;c<nc;c++){
-      let s=Math.max(-1,Math.min(1,chs[c][i]));
-      v.setInt16(off,s<0?s*0x8000:s*0x7FFF,true);
-      off+=2;
-    }
-  }
-  return new Blob([ab],{type:'audio/wav'});
-}
-
-async function exportMix(){
-  const list=['A','B','C','D'].map(k=>buffers[k]).filter(b=>b);
-  if(!list.length)return;
-  exportBtn.disabled=true;
-  setStatus('rendering...');
-  try{
-    await ensureCtx();
-    const sr=audioCtx.sampleRate,gap=0.6;
-    let total=0;
-    for(const b of list)total+=b.duration;
-    total+=gap*(list.length-1);
-    const off=new OfflineAudioContext(1,Math.ceil(total*sr),sr);
-    let t=0;
-    for(let i=0;i<list.length;i++){
-      const s=off.createBufferSource();
-      s.buffer=list[i];
-      s.connect(off.destination);
-      s.start(t);
-      t+=list[i].duration+gap;
-    }
-    const rendered=await off.startRendering();
-    const wav=encodeWAV(rendered);
-    const stamp=new Date().toISOString().replace(/[:.]/g,'-').slice(0,19);
-    const filename='backmask-'+stamp+'.wav';
-    const file=new File([wav],filename,{type:'audio/wav'});
-    if(navigator.canShare&&navigator.canShare({files:[file]})){
-      try{await navigator.share({files:[file],title:'BACKMASK'});setStatus('exported');}
-      catch(err){setStatus(err.name==='AbortError'?'cancelled':'share failed');}
-    }else{
-      const url=URL.createObjectURL(wav);
-      const a=document.createElement('a');
-      a.href=url;a.download=filename;
-      document.body.appendChild(a);a.click();document.body.removeChild(a);
-      setTimeout(()=>URL.revokeObjectURL(url),2000);
-      setStatus('downloaded');
-    }
-  }catch(err){setStatus('export failed');}
-  refreshExportBtn();
-}
-
-quickA.addEventListener('click',()=>{if(activeMode==='source')stopRecording();else if(!activeMode)startRecording('source');});
-quickC.addEventListener('click',()=>{if(activeMode==='try')stopRecording();else if(!activeMode)startRecording('try');});
-bA.addEventListener('click',()=>{if(buffers.A)play('A',bA,'original');});
-bB.addEventListener('click',()=>{
-  bC.disabled=false;
-  bD.disabled=false;
-  quickC.disabled=false;
-  bC.classList.add('next-up');
-  bD.classList.add('next-up');
-  quickC.classList.add('next-up');
-  play('B',bB,'reversed');
-});
-bC.addEventListener('click',()=>play('C',bC,'your try'));
-bD.addEventListener('click',()=>play('D',bD,'try reversed'));
-exportBtn.addEventListener('click',exportMix);
-</script>
+  <footer>Everything stays on your device</footer>
 </body>
 </html>
